@@ -143,3 +143,45 @@ def load_cet_monthly(
         raw_path=RAW_CET_MONTHLY_PATH,
         processed_path=processed_path,
     )
+
+def add_monthly_anomalies(
+    df_cet: pd.DataFrame,
+    centre_year: int = 1855,
+    window_half_width: int = 5,
+) -> pd.DataFrame:
+    """
+    Adds monthly baseline and anomaly columns to a CET monthly dataframe.
+
+    - Baseline = mean of t_mean over [centre_year - window_half_width,
+                                      centre_year + window_half_width],
+      computed separately for each calendar month (Jan..Dec).
+    - Anomaly = t_mean - monthly_baseline.
+    """
+    df = df_cet.copy()
+
+    start = centre_year - window_half_width
+    end = centre_year + window_half_width
+
+    # 11-year window around centre_year
+    baseline_mask = df["year"].between(start, end)
+    baseline_df = df.loc[baseline_mask]
+
+    # One baseline per month (1..12)
+    monthly_baseline = (
+        baseline_df
+        .groupby("month")["t_mean"]
+        .mean()
+        .rename("t_mean_baseline")
+    )
+
+    # Merge back onto full dataframe
+    df = df.merge(
+        monthly_baseline,
+        on="month",
+        how="left",
+    )
+
+    # Monthly anomaly = deviation from that month’s baseline
+    df["t_anom"] = df["t_mean"] - df["t_mean_baseline"]
+
+    return df
