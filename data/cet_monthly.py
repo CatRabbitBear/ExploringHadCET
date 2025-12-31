@@ -9,11 +9,7 @@ import pandas as pd
 # --- Paths -------------------------------------------------------------
 
 # Project root = .../climate_dashboard/
-BASE_DIR = Path(__file__).resolve().parents[1]
-DATA_DIR = BASE_DIR / "data"
-
-RAW_CET_MONTHLY_PATH = DATA_DIR / "raw" / "meantemp_monthly_totals.txt"
-PROCESSED_CET_MONTHLY_PATH = DATA_DIR / "processed" / "cet_monthly.parquet"
+from .config import CET_RAW_MONTHLY_PATH, CET_PROCESSED_MONTHLY_PATH
 
 
 def _find_header_row(path: Path) -> int:
@@ -34,7 +30,7 @@ def parse_raw_hadcet_monthly(path: Optional[Path] = None) -> pd.DataFrame:
     Parse the raw HadCET monthly mean temperature .txt file into a tidy DataFrame.
     """
     if path is None:
-        path = RAW_CET_MONTHLY_PATH
+        path = CET_RAW_MONTHLY_PATH
 
     if not path.exists():
         raise FileNotFoundError(f"Raw HadCET file not found at {path}")
@@ -105,9 +101,9 @@ def build_and_save_cet_monthly(
     Returns the processed DataFrame for convenience.
     """
     if raw_path is None:
-        raw_path = RAW_CET_MONTHLY_PATH
+        raw_path = CET_RAW_MONTHLY_PATH
     if processed_path is None:
-        processed_path = PROCESSED_CET_MONTHLY_PATH
+        processed_path = CET_PROCESSED_MONTHLY_PATH
 
     df = parse_raw_hadcet_monthly(raw_path)
 
@@ -128,7 +124,7 @@ def load_cet_monthly(
     it will parse the raw .txt and create it automatically.
     """
     if processed_path is None:
-        processed_path = PROCESSED_CET_MONTHLY_PATH
+        processed_path = CET_PROCESSED_MONTHLY_PATH
 
     if processed_path.exists():
         return pd.read_parquet(processed_path)
@@ -140,7 +136,7 @@ def load_cet_monthly(
 
     # Fall back to building from raw
     return build_and_save_cet_monthly(
-        raw_path=RAW_CET_MONTHLY_PATH,
+        raw_path=CET_RAW_MONTHLY_PATH,
         processed_path=processed_path,
     )
 
@@ -184,4 +180,13 @@ def add_monthly_anomalies(
     # Monthly anomaly = deviation from that month’s baseline
     df["t_anom"] = df["t_mean"] - df["t_mean_baseline"]
 
+    return df
+
+
+def get_cet_monthly_with_anomalies(
+    centre_year: int = 1855,
+    window_half_width: int = 5,
+) -> pd.DataFrame:
+    df = load_cet_monthly()
+    df = add_monthly_anomalies(df, centre_year=centre_year, window_half_width=window_half_width)
     return df
