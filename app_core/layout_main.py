@@ -33,7 +33,7 @@ def get_layout(df_cet: pd.DataFrame):
 
             dcc.Graph(
                 id="cet-3d-lines",
-                style={"height": "65vh"},
+                style={"height": "55vh"},
             )
         ],
     )

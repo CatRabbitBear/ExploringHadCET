@@ -3,16 +3,17 @@ import plotly.graph_objs as go
 import pandas as pd
 
 from data.cet_surface import get_cet_loess_surface_grid
+from app_core.plot_theme import CLIMATE_TEMPLATE, COLORS, layout_cet_2d, layout_cet_3d, legend_highlights
 
 
-def make_anomaly_to_rgb(clim_range: float = 3.0):
+def make_anomaly_to_rgb(clim_range: float = COLORS.anomaly.range_c):
     """
     anom (°C) -> (r, g, b) with a gentle diverging scheme:
     neutral around 0, soft blue for cool, soft red/orange for warm.
     """
-    neutral = (210, 210, 210)
-    cool    = (120, 160, 210)   # soft blue
-    warm    = (220, 150, 130)   # soft red/orange
+    neutral = COLORS.anomaly.neutral_rgb
+    cool    = COLORS.anomaly.cool_rgb
+    warm    = COLORS.anomaly.warm_rgb
 
     def interp(c_from, c_to, t: float):
         return tuple(int(c_from[i] + t * (c_to[i] - c_from[i])) for i in range(3))
@@ -35,7 +36,7 @@ def make_anomaly_to_rgb(clim_range: float = 3.0):
     return anomaly_to_rgb
 
 
-def make_year_to_alpha(df_cet: pd.DataFrame, alpha_min: float = 0.15, alpha_max: float = 0.95):
+def make_year_to_alpha(df_cet: pd.DataFrame, alpha_min: float = 0.8, alpha_max: float = 0.95):
     """
     Map year -> alpha between alpha_min (earliest) and alpha_max (latest).
     Used mainly for 2D; 3D will clamp to avoid washed-out lines.
@@ -79,56 +80,113 @@ def register_callbacks(app, df_cet: pd.DataFrame):
             .reset_index()
         )
 
+        years_available = sorted(monthly["year"].unique().astype(int).tolist())
+        if not years_available:
+            return go.Figure()
+
+        first_year = years_available[0]
+        latest_year = years_available[-1]
+        prev_year = years_available[-2] if len(years_available) >= 2 else None
+
+        # Mid year anchor: include only if explicitly present
+        target_mid = 1855
+        mid_year = target_mid if target_mid in years_available else None
+
+        highlight_years = {first_year, latest_year}
+        if prev_year is not None:
+            highlight_years.add(prev_year)
+        if mid_year is not None:
+            highlight_years.add(mid_year)
+
         fig = go.Figure()
 
+        # --- Background styling (more muted) ---
+        bg_grey = (160, 160, 160)  # lighter grey
+        bg_width = 1.0
+        # Keep background lines subtle (texture only)
+        bg_alpha_min = 0.03
+        bg_alpha_max = 0.18
+
+        def year_to_alpha_bg(year: int) -> float:
+            # reuse your year_to_alpha but compress it to a subtle band
+            a = year_to_alpha(year)
+            # a is in ~[0.15..0.95] from your function; remap to bg band
+            # map 0..1 to bg range just in case you change year_to_alpha later
+            a01 = max(0.0, min(1.0, (a - 0.15) / (0.95 - 0.15)))
+            return bg_alpha_min + a01 * (bg_alpha_max - bg_alpha_min)
+
+        # --- Highlight styling ---
+        hi_width = 3.6
+        mid_green = COLORS.highlight.reference_green
+        hi_alpha = 1.0
+
+        # 1) Add ALL background lines first (so highlights sit on top)
         for year, group in monthly.groupby("year"):
             year = int(year)
+            if year in highlight_years:
+                continue
+
             group = group.sort_values("month")
 
-            ref_anom = float(group["t_anom"].mean())
-            r, g, b = anomaly_to_rgb(ref_anom)
-            alpha = year_to_alpha(year)  # 2D alpha can go fairly low
+            alpha = year_to_alpha_bg(year)
+            r, g, b = bg_grey
             color = f"rgba({r},{g},{b},{alpha})"
 
             fig.add_trace(
                 go.Scatter(
                     x=group["month_name"],
                     y=group["t_mean"],
-                    mode="lines",  # lines only, no markers
-                    name=str(year),
-                    line=dict(color=color, width=1.5),
+                    mode="lines",
+                    line=dict(color=color, width=bg_width),
+                    showlegend=False,
+                    hoverinfo="skip",
                 )
             )
 
-        fig.update_layout(
-            xaxis=dict(
-                title="Month",
-                showgrid=False,
-                zeroline=False,
-                tickangle=0,
-            ),
-            yaxis=dict(
-                title="Mean Temp (°C)",
-                range=y_range,
-                showgrid=True,
-                gridcolor="rgba(0,0,0,0.08)",
-                zeroline=False,
-            ),
-            legend_title="Year",
-            hovermode="x unified",
-            margin=dict(l=40, r=10, t=60, b=40),
-            plot_bgcolor="#f8f9fb",
-            paper_bgcolor="#ffffff",
-        )
-
-        # soften legend a bit
-        fig.update_layout(
-            legend=dict(
-                bgcolor="rgba(255,255,255,0.8)",
-                bordercolor="rgba(0,0,0,0.1)",
-                borderwidth=1,
+        # Helper to add highlight traces (painted last)
+        def add_highlight(year: int, label: str, color: str):
+            group = monthly[monthly["year"] == year].sort_values("month")
+            fig.add_trace(
+                go.Scatter(
+                    x=group["month_name"],
+                    y=group["t_mean"],
+                    mode="lines",
+                    name=label,
+                    line=dict(color=color, width=hi_width),
+                    showlegend=True,
+                    hovertemplate=(
+                        f"<b>{label}</b><br>"
+                        "Month: %{x}<br>"
+                        "Temp: %{y:.2f} °C"
+                        "<extra></extra>"
+                    ),
+                )
             )
-        )
+
+        # 2) Add highlights last, in a sensible legend order
+        # First year
+        g_first = monthly[monthly["year"] == first_year]
+        r, g, b = anomaly_to_rgb(float(g_first["t_anom"].mean()))
+        add_highlight(first_year, f"{first_year} (first)", f"rgba({r},{g},{b},{hi_alpha})")
+
+        # Mid-year (only if present)
+        if mid_year is not None:
+            add_highlight(mid_year, f"{mid_year} (reference)", mid_green)
+
+        # Previous year (if present)
+        if prev_year is not None:
+            g_prev = monthly[monthly["year"] == prev_year]
+            r, g, b = anomaly_to_rgb(float(g_prev["t_anom"].mean()))
+            add_highlight(prev_year, f"{prev_year} (previous)", f"rgba({r},{g},{b},{hi_alpha})")
+
+        # Latest year
+        g_latest = monthly[monthly["year"] == latest_year]
+        r, g, b = anomaly_to_rgb(float(g_latest["t_anom"].mean()))
+        add_highlight(latest_year, f"{latest_year} (latest)", f"rgba({r},{g},{b},{hi_alpha})")
+
+        fig.update_layout(template=CLIMATE_TEMPLATE)
+        fig.update_layout(**layout_cet_2d(y_range))
+        fig.update_layout(**legend_highlights("Highlighted years"))
 
         return fig
 
@@ -164,10 +222,8 @@ def register_callbacks(app, df_cet: pd.DataFrame):
             ref_anom = float(group["t_anom"].mean())
             r, g, b = anomaly_to_rgb(ref_anom)
 
-            # in 3D, don't let alpha get too low or it goes weirdly white
-            alpha_2d = year_to_alpha(year)
-            alpha_3d = max(0.7, alpha_2d)
-            color_3d = f"rgba({r},{g},{b},{alpha_3d})"
+            alpha = 0.95
+            color_3d = f"rgba({r},{g},{b},{alpha})"
 
             fig3d.add_trace(
                 go.Scatter3d(
@@ -199,40 +255,7 @@ def register_callbacks(app, df_cet: pd.DataFrame):
                 )
             )
 
-        fig3d.update_layout(
-            scene=dict(
-                xaxis=dict(
-                    title="Month",
-                    tickmode="array",
-                    tickvals=month_vals,
-                    ticktext=month_labels,
-                    showgrid=False,
-                    showbackground=False,
-                    zeroline=False,
-                ),
-                yaxis=dict(
-                    title="Year",
-                    showgrid=False,
-                    showbackground=False,
-                    zeroline=False,
-                ),
-                zaxis=dict(
-                    title="Mean Temp (°C)",
-                    range=y_range,
-                    showgrid=True,
-                    gridcolor="rgba(0,0,0,0.12)",
-                    zeroline=False,
-                ),
-            ),
-            margin=dict(l=0, r=0, t=40, b=0),
-            legend_title="Series",
-            paper_bgcolor="#ffffff",
-        )
-
-        fig3d.update_layout(
-            scene_camera=dict(
-                eye=dict(x=1.6, y=1.2, z=1.1),
-            )
-        )
+        fig3d.update_layout(template=CLIMATE_TEMPLATE)
+        fig3d.update_layout(**layout_cet_3d(y_range, month_vals, month_labels))
 
         return fig3d
