@@ -22,11 +22,7 @@ def build_cet_2d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) 
     dff = df_cet[df_cet["year"].isin(selected_years)].copy()
 
     # Already monthly, but keep the shape the same as before
-    monthly = (
-        dff.groupby(["year", "month", "month_name"], sort=True)[["tmean_c", ANOM_COL]]
-        .mean()
-        .reset_index()
-    )
+    monthly = dff[["year", "month", "month_name", "tmean_c", ANOM_COL]].copy()
 
     years_available = sorted(monthly["year"].unique().astype(int).tolist())
     if not years_available:

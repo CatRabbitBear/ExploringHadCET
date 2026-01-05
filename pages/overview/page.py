@@ -5,7 +5,11 @@ import pandas as pd
 
 def get_overview_layout(df_cet: pd.DataFrame):
     years = sorted(df_cet["year"].unique())
-    default_years = years[-20:] if len(years) > 20 else years
+    min_year, max_year = int(years[0]), int(years[-1])
+
+    # Defaults: last 50 years feels good; tweak to taste
+    default_end = max_year
+    default_start = max(min_year, max_year - 49)
 
     return dmc.Stack(
         gap="md",
@@ -20,12 +24,31 @@ def get_overview_layout(df_cet: pd.DataFrame):
                     dmc.Stack(
                         gap="xs",
                         children=[
-                            dmc.Text("Select years to display:", fw=500),
-                            dcc.Dropdown(
-                                id="cet-year-select",
-                                options=[{"label": str(y), "value": int(y)} for y in years],
-                                value=[int(y) for y in default_years],
-                                multi=True,
+                            dmc.Group(
+                                justify="space-between",
+                                align="end",
+                                children=[
+                                    dmc.Stack(
+                                        gap=2,
+                                        children=[
+                                            dmc.Text("View range", fw=600),
+                                            dmc.Text(
+                                                "Presets keep the charts fast and the story consistent.",
+                                                size="sm",
+                                                c="dimmed",
+                                            ),
+                                        ],
+                                    ),
+                                    dmc.SegmentedControl(
+                                        id="cet-range-preset",
+                                        value="modern",
+                                        data=[
+                                            {"label": "Modern era", "value": "modern"},
+                                            {"label": "Instrumental era", "value": "instrumental"},
+                                            {"label": "Full record", "value": "full"},
+                                        ],
+                                    ),
+                                ],
                             ),
                         ],
                     )
@@ -41,10 +64,9 @@ def get_overview_layout(df_cet: pd.DataFrame):
                         justify="space-between",
                         children=[
                             dmc.Title("2D view", order=4),
-                            # later: info icon / tooltip could go here
                         ],
                     ),
-                    dcc.Graph(id="cet-jan-dec-lines", style={"height": "55vh"}),
+                    dcc.Graph(id="cet-jan-dec-lines", style={"height": "50vh"}),
                 ],
             ),
 
@@ -53,13 +75,23 @@ def get_overview_layout(df_cet: pd.DataFrame):
                 shadow="sm",
                 radius="md",
                 children=[
-                    dmc.Group(
-                        justify="space-between",
+                    dmc.Stack(
+                        gap="xs",
                         children=[
-                            dmc.Title("3D view", order=4),
+                            dmc.Group(
+                                justify="space-between",
+                                children=[
+                                    dmc.Title("3D view (LOESS surface)", order=4),
+                                ],
+                            ),
+                            dmc.Text(
+                                "A smoothed surface of the same monthly data, coloured by anomaly relative to the baseline.",
+                                size="sm",
+                                c="dimmed",
+                            ),
+                            dcc.Graph(id="cet-3d-lines", style={"height": "60vh"}),
                         ],
-                    ),
-                    dcc.Graph(id="cet-3d-lines", style={"height": "55vh"}),
+                    )
                 ],
             ),
         ],

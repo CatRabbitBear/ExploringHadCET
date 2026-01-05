@@ -43,3 +43,25 @@ def get_loess_surface_grid(
         z_col=value_col,
     )
     return months, years_arr, Z
+
+def get_surface_grids(
+    *,
+    years: list[int] | None = None,
+    z_col: str = "tmean_loess_0p25_c",
+    surfacecolor_col: str | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray | None]:
+    """
+    Return x(months), y(years), Z grid, and optional surfacecolor grid.
+    """
+    df = load_monthly_features()
+
+    if years:
+        df = df[df["year"].isin(years)]
+
+    months, years_arr, Z = df_to_grid(df, x_col="month", y_col="year", z_col=z_col)
+
+    C = None
+    if surfacecolor_col is not None:
+        _, _, C = df_to_grid(df, x_col="month", y_col="year", z_col=surfacecolor_col)
+
+    return months, years_arr, Z, C
