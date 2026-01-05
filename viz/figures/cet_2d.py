@@ -5,6 +5,9 @@ from app_core.plot_theme import CLIMATE_TEMPLATE, COLORS, layout_cet_2d, legend_
 from viz.utils import make_anomaly_to_rgb, make_year_to_alpha
 
 
+ANOM_COL = "tmean_anom_1961_1990_c"   # switchable later
+
+
 def build_cet_2d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) -> go.Figure:
     if not selected_years:
         selected_years = [int(df_cet["year"].max())]
@@ -12,14 +15,15 @@ def build_cet_2d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) 
     anomaly_to_rgb = make_anomaly_to_rgb()
     year_to_alpha = make_year_to_alpha(df_cet)
 
-    t_min = float(df_cet["t_mean"].min())
-    t_max = float(df_cet["t_mean"].max())
+    t_min = float(df_cet["tmean_c"].min())
+    t_max = float(df_cet["tmean_c"].max())
     y_range = [t_min - 0.5, t_max + 0.5]
 
     dff = df_cet[df_cet["year"].isin(selected_years)].copy()
 
+    # Already monthly, but keep the shape the same as before
     monthly = (
-        dff.groupby(["year", "month", "month_name"], sort=True)[["t_mean", "t_anom"]]
+        dff.groupby(["year", "month", "month_name"], sort=True)[["tmean_c", ANOM_COL]]
         .mean()
         .reset_index()
     )
@@ -71,7 +75,7 @@ def build_cet_2d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) 
         fig.add_trace(
             go.Scatter(
                 x=group["month_name"],
-                y=group["t_mean"],
+                y=group["tmean_c"],
                 mode="lines",
                 line=dict(color=color, width=bg_width),
                 showlegend=False,
@@ -84,7 +88,7 @@ def build_cet_2d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) 
         fig.add_trace(
             go.Scatter(
                 x=group["month_name"],
-                y=group["t_mean"],
+                y=group["tmean_c"],
                 mode="lines",
                 name=label,
                 line=dict(color=color, width=hi_width),
@@ -99,7 +103,7 @@ def build_cet_2d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) 
         )
 
     g_first = monthly[monthly["year"] == first_year]
-    r, g, b = anomaly_to_rgb(float(g_first["t_anom"].mean()))
+    r, g, b = anomaly_to_rgb(float(g_first[ANOM_COL].mean()))
     add_highlight(first_year, f"{first_year} (first)", f"rgba({r},{g},{b},{hi_alpha})")
 
     if mid_year is not None:
@@ -107,11 +111,11 @@ def build_cet_2d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) 
 
     if prev_year is not None:
         g_prev = monthly[monthly["year"] == prev_year]
-        r, g, b = anomaly_to_rgb(float(g_prev["t_anom"].mean()))
+        r, g, b = anomaly_to_rgb(float(g_prev[ANOM_COL].mean()))
         add_highlight(prev_year, f"{prev_year} (previous)", f"rgba({r},{g},{b},{hi_alpha})")
 
     g_latest = monthly[monthly["year"] == latest_year]
-    r, g, b = anomaly_to_rgb(float(g_latest["t_anom"].mean()))
+    r, g, b = anomaly_to_rgb(float(g_latest[ANOM_COL].mean()))
     add_highlight(latest_year, f"{latest_year} (latest)", f"rgba({r},{g},{b},{hi_alpha})")
 
     fig.update_layout(template=CLIMATE_TEMPLATE)

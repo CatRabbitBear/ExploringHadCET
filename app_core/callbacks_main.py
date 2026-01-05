@@ -2,7 +2,7 @@ from dash import Input, Output
 import plotly.graph_objs as go
 import pandas as pd
 
-from data.cet_surface import get_cet_loess_surface_grid
+from data import get_loess_surface_grid
 from app_core.plot_theme import CLIMATE_TEMPLATE, COLORS, layout_cet_2d, layout_cet_3d, legend_highlights
 
 
@@ -237,9 +237,8 @@ def register_callbacks(app, df_cet: pd.DataFrame):
             )
 
         # LOESS surface using the data-layer helper
-        months_grid, years_grid, Z_grid = get_cet_loess_surface_grid(
-            selected_years=list(sorted(dff["year"].unique())),
-            frac=0.25,
+        months_grid, years_grid, Z_grid = get_loess_surface_grid(
+            years=list(sorted(dff["year"].unique()))
         )
 
         if Z_grid.size > 0:
