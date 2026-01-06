@@ -2,6 +2,8 @@ import pandas as pd
 import dash_mantine_components as dmc
 from dash import html, dcc
 
+from app_core.app_state import make_app_state_store
+
 
 SECTIONS = [
     ("overview", "Overview"),
@@ -17,16 +19,62 @@ def get_shell_layout(df_cet: pd.DataFrame):
         "fontFamily": "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
         "primaryColor": "blue",
         "defaultRadius": "md",
-        # optional: keep defaults, or customise later
-        # "breakpoints": {"sm": "48em", ...}
     }
+
+    def desktop_nav():
+        # link-based "pills"
+        return dmc.Group(
+            gap="xs",
+            visibleFrom="sm",
+            children=[
+                dcc.Link(
+                    dmc.Button(label, variant="light", size="sm"),
+                    href=f"/{key}",
+                    style={"textDecoration": "none"},
+                )
+                for key, label in SECTIONS
+            ],
+        )
+
+    def mobile_nav():
+        return dmc.Box(
+            hiddenFrom="sm",  # 👈 Box supports responsive props
+            children=[
+                dmc.Menu(
+                    position="bottom-end",
+                    withinPortal=True,
+                    children=[
+                        dmc.MenuTarget(
+                            dmc.Button("Sections", variant="light", size="sm")
+                        ),
+                        dmc.MenuDropdown(
+                            children=[
+                                dmc.MenuItem(
+                                    dcc.Link(
+                                        label,
+                                        href=f"/{key}",
+                                        style={
+                                            "textDecoration": "none",
+                                            "color": "inherit",
+                                            "display": "block",
+                                            "width": "100%",
+                                        },
+                                    )
+                                )
+                                for key, label in SECTIONS
+                            ]
+                        ),
+                    ],
+                )
+            ],
+        )
 
     return dmc.MantineProvider(
         theme=theme,
         children=[
-            dcc.Store(id="nav-section-store", data="overview"),
+            dcc.Location(id="url", refresh=False),
+            make_app_state_store(),
 
-            # --- Sticky header ---
             dmc.Box(
                 style={
                     "position": "sticky",
@@ -52,33 +100,8 @@ def get_shell_layout(df_cet: pd.DataFrame):
                                             dmc.Badge("v1", variant="light"),
                                         ],
                                     ),
-
-                                    # Desktop tabs (visible from sm and up)
-                                    dmc.Tabs(
-                                        id="nav-tabs",
-                                        value="overview",
-                                        variant="pills",
-                                        visibleFrom="sm",
-                                        children=[
-                                            dmc.TabsList(
-                                                children=[
-                                                    dmc.TabsTab(label, value=key)
-                                                    for key, label in SECTIONS
-                                                ]
-                                            )
-                                        ],
-                                    ),
-
-                                    # Mobile select (hidden from sm and up => only < sm)
-                                    dmc.Select(
-                                        id="nav-select",
-                                        value="overview",
-                                        data=[{"value": key, "label": label} for key, label in SECTIONS],
-                                        w=220,
-                                        searchable=False,
-                                        clearable=False,
-                                        hiddenFrom="sm",
-                                    ),
+                                    desktop_nav(),
+                                    mobile_nav(),
                                 ],
                             ),
                         ],
@@ -86,7 +109,6 @@ def get_shell_layout(df_cet: pd.DataFrame):
                 ],
             ),
 
-            # --- Main content ---
             dmc.Container(
                 size="lg",
                 px="md",

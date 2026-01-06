@@ -1,7 +1,6 @@
 from dash import Output, Input, State, ctx, no_update
 import dash_mantine_components as dmc
 
-
 from pages.overview.page import get_overview_layout
 # later:
 # from pages.exceptional.page import get_exceptional_layout
@@ -10,40 +9,69 @@ from pages.overview.page import get_overview_layout
 # from pages.methodology.page import get_methodology_layout
 
 
+VALID_SECTIONS = {"overview", "exceptional", "winter", "rainfall", "method"}
+
+
+def _section_from_path(pathname: str | None) -> str:
+    if not pathname or pathname == "/":
+        return "overview"
+    # "/overview" -> "overview"
+    s = pathname.strip("/").split("/")[0].strip()
+    return s if s in VALID_SECTIONS else "overview"
+
+
+def _path_from_section(section: str) -> str:
+    if section not in VALID_SECTIONS:
+        section = "overview"
+    return f"/{section}"
+
+
 def register_shell_callbacks(app, df_cet):
+    # 1) UI -> URL (user clicks tabs or dropdown)
     @app.callback(
-        Output("nav-section-store", "data"),
-        Output("nav-tabs", "value"),
-        Output("nav-select", "value"),
+        Output("url", "pathname"),
         Input("nav-tabs", "value"),
         Input("nav-select", "value"),
-        State("nav-section-store", "data"),
-        prevent_initial_call=False,
+        State("url", "pathname"),
+        prevent_initial_call=True,
     )
-    def sync_nav(tab_value, select_value, current):
+    def nav_to_url(tab_value, select_value, current_pathname):
         trig = ctx.triggered_id
 
         if trig == "nav-tabs" and tab_value:
-            chosen = tab_value
+            desired = _path_from_section(tab_value)
         elif trig == "nav-select" and select_value:
-            chosen = select_value
+            desired = _path_from_section(select_value)
         else:
-            # initial load or weird edge: fall back to stored value
-            chosen = current or "overview"
+            return no_update
 
-        # keep all three aligned
-        return chosen, chosen, chosen
+        # 🔑 Break the dependency cycle: if we're already at that URL, do nothing
+        if current_pathname == desired:
+            return no_update
+
+        return desired
+
+    # 2) URL -> UI (sync controls on refresh/back/share link)
+    @app.callback(
+        Output("nav-tabs", "value"),
+        Output("nav-select", "value"),
+        Input("url", "pathname"),
+    )
+    def url_to_nav(pathname):
+        section = _section_from_path(pathname)
+        return section, section
 
 def register_page_router_callback(app, df_cet):
     @app.callback(
         Output("page-content", "children"),
-        Input("nav-section-store", "data"),
+        Input("url", "pathname"),
     )
-    def render_page(section: str):
+    def render_page(pathname: str):
+        section = _section_from_path(pathname)
+
         if section == "overview":
             return get_overview_layout(df_cet)
 
-        # placeholders for now
         title_map = {
             "exceptional": "Exceptional Months",
             "winter": "Winter in Focus",
