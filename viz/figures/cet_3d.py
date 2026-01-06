@@ -5,7 +5,7 @@ from data import get_surface_grids
 from app_core.plot_theme import CLIMATE_TEMPLATE, layout_cet_3d
 
 
-LOESS_COL = "tmean_loess_0p25_c"
+LOESS_COL = "tmean_loess_0p07_c"
 BASELINE_COL = "tmean_base_1961_1990_c"   # month-specific baseline mean
 SURF_COL = "tmean_loess_anom_1961_1990_c" # computed on the fly below
 
@@ -75,9 +75,9 @@ def build_cet_3d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) 
                 y=years_grid,
                 z=Z_grid,
                 surfacecolor=C_grid,
-                opacity=0.92,
-                cmin=-3.0,
-                cmax=3.0,
+                opacity=1.0,
+                cmin=-4.0,
+                cmax=4.0,
                 colorscale="RdBu_r",  # diverging, warm=red, cool=blue
                 colorbar=dict(
                     title="Anomaly (°C)",
@@ -86,16 +86,16 @@ def build_cet_3d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) 
                     thickness=14,
                 ),
                 contours=dict(
-                    z=dict(show=True, usecolormap=False, highlight=False, project=dict(z=True))
+                    z=dict(show=True, usecolormap=False, highlight=False, color="rgba(0,0,0,0.25)", project=dict(z=False))
                 ),
                 lighting=dict(
-                    ambient=0.35,
-                    diffuse=0.75,
-                    roughness=0.55,
-                    specular=0.25,
-                    fresnel=0.05,
+                    ambient=0.9,
+                    diffuse=0.01,
+                    roughness=0.8,
+                    specular=0.00,
+                    fresnel=0.00,
                 ),
-                lightposition=dict(x=100, y=200, z=100),
+                lightposition=dict(x=6.5, y=1850, z=5),
                 showscale=True,
                 name="LOESS surface",
                 hovertemplate=(

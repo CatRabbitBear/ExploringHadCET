@@ -24,8 +24,8 @@ BASELINES: Dict[str, Tuple[int, int]] = {
 }
 
 # LOESS config (lock for v1)
-LOESS_FRAC = 0.25
-LOESS_SUFFIX = "0p25"  # used in column names
+LOESS_FRAC = 0.07
+LOESS_SUFFIX = "0p07"  # used in column names
 
 
 def season_from_month(m: int) -> str:
