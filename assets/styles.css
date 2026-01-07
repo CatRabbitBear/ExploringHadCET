@@ -1,0 +1,18 @@
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--mantine-color-body);
+  border-bottom: 1px solid var(--mantine-color-gray-3);
+}
+
+/* optional: makes header feel crisp over scrolling graphs */
+.app-header--elevated {
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+}
+
+/* unify card spacing/layout feel */
+.chart-card .js-plotly-plot {
+  /* helps Plotly respect the surrounding look */
+  border-radius: var(--mantine-radius-md);
+}

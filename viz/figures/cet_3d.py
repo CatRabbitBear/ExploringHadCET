@@ -3,6 +3,7 @@ import plotly.graph_objs as go
 
 from data import get_surface_grids
 from app_core.plot_theme import CLIMATE_TEMPLATE, layout_cet_3d
+from app_core.palette import CLIMATE
 
 
 LOESS_COL = "tmean_loess_0p07_c"
@@ -76,9 +77,9 @@ def build_cet_3d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) 
                 z=Z_grid,
                 surfacecolor=C_grid,
                 opacity=1.0,
-                cmin=-4.0,
-                cmax=4.0,
-                colorscale="RdBu_r",  # diverging, warm=red, cool=blue
+                cmin=CLIMATE.anomaly_cmin(),
+                cmax=CLIMATE.anomaly_cmax(),
+                colorscale=CLIMATE.anomaly_colorscale,  # diverging, warm=red, cool=blue
                 colorbar=dict(
                     title="Anomaly (°C)",
                     # titleside="right",

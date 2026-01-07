@@ -1,0 +1,74 @@
+from dataclasses import dataclass
+from typing import Tuple, List, Union
+
+from app_core.color_utils import sample_colorscale
+
+PlotlyColorscale = Union[str, List[list]]  # allow string or explicit list later
+
+def rgb(rgb_: Tuple[int, int, int]) -> str:
+    r, g, b = rgb_
+    return f"rgb({r},{g},{b})"
+
+@dataclass(frozen=True)
+class UIPalette:
+    surface: str
+    surface_alt: str
+    border: str
+    text_muted: str
+
+
+@dataclass(frozen=True)
+class ClimatePalette:
+    anomaly_colorscale: PlotlyColorscale
+    anomaly_range_c: float
+    reference_green: str
+
+    def anomaly_cmin(self) -> float:
+        return -self.anomaly_range_c
+
+    def anomaly_cmax(self) -> float:
+        return +self.anomaly_range_c
+
+    def sample_anomaly_rgb(self, value: float) -> tuple[int, int, int]:
+        return sample_colorscale(
+            self.anomaly_colorscale,
+            value,
+            vmin=-self.anomaly_range_c,
+            vmax=+self.anomaly_range_c,
+        )
+
+
+@dataclass(frozen=True)
+class PlotPalette:
+    background_paper: str
+    background_plot: str
+    background_legend: str
+    border_legend:str
+    grid_2d: str
+    grid_3d: str
+    history_grey: Tuple[int, int, int]
+
+
+
+UI = UIPalette(
+    surface="var(--mantine-color-body)",
+    surface_alt="var(--mantine-color-gray-0)",
+    border="var(--mantine-color-gray-3)",
+    text_muted="var(--mantine-color-dimmed)",
+)
+
+CLIMATE = ClimatePalette(
+    anomaly_colorscale="Jet", #"RdBu_r"
+    anomaly_range_c=3.0,
+    reference_green="rgba(80, 140, 110, 1.0)",
+)
+
+PLOT = PlotPalette(
+    background_paper="#ffffff",
+    background_plot="#f8f9fb",
+    background_legend="rgba(255,255,255,0.85)",
+    border_legend="rgba(0,0,0,0.12)",
+    grid_2d="rgba(0,0,0,0.08)",
+    grid_3d="rgba(0,0,0,0.12)",
+    history_grey=(160, 160, 160),
+)

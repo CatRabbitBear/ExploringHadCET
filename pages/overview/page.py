@@ -4,12 +4,8 @@ import pandas as pd
 
 
 def get_overview_layout(df_cet: pd.DataFrame):
-    years = sorted(df_cet["year"].unique())
-    min_year, max_year = int(years[0]), int(years[-1])
-
-    # Defaults: last 50 years feels good; tweak to taste
-    default_end = max_year
-    default_start = max(min_year, max_year - 49)
+    years = sorted(df_cet["year"].unique().astype(int).tolist())
+    min_year, max_year = years[0], years[-1]
 
     return dmc.Stack(
         gap="md",
@@ -22,7 +18,7 @@ def get_overview_layout(df_cet: pd.DataFrame):
                 radius="md",
                 children=[
                     dmc.Stack(
-                        gap="xs",
+                        gap="sm",
                         children=[
                             dmc.Group(
                                 justify="space-between",
@@ -50,6 +46,53 @@ def get_overview_layout(df_cet: pd.DataFrame):
                                     ),
                                 ],
                             ),
+
+                            dmc.Divider(),
+
+                            dmc.Group(
+                                justify="space-between",
+                                align="end",
+                                children=[
+                                    dmc.Stack(
+                                        gap=2,
+                                        children=[
+                                            dmc.Text("2D highlight", fw=600),
+                                            dmc.Text(
+                                                "One year stands out against the full context.",
+                                                size="sm",
+                                                c="dimmed",
+                                            ),
+                                        ],
+                                    ),
+                                    dmc.Group(
+                                        gap="sm",
+                                        align="end",
+                                        children=[
+                                            dmc.SegmentedControl(
+                                                id="cet-highlight-mode",
+                                                value="latest",
+                                                data=[
+                                                    {"label": "Latest", "value": "latest"},
+                                                    {"label": "Previous", "value": "previous"},
+                                                    {"label": "Reference", "value": "reference"},
+                                                    {"label": "Custom", "value": "custom"},
+                                                ],
+                                            ),
+                                            dmc.Select(
+                                                id="cet-highlight-year",
+                                                value=str(max_year),
+                                                data=[{"value": str(y), "label": str(y)} for y in years],
+                                                searchable=True,
+                                                clearable=False,
+                                                w=140,
+                                                style={"display": "none"},  # shown only when mode == "custom"
+                                            ),
+                                        ],
+                                    ),
+                                ],
+                            ),
+
+                            dmc.Text(f"Data range: {min_year}–{max_year}", size="xs", c="dimmed"),
                         ],
                     )
                 ],
@@ -60,13 +103,8 @@ def get_overview_layout(df_cet: pd.DataFrame):
                 shadow="sm",
                 radius="md",
                 children=[
-                    dmc.Group(
-                        justify="space-between",
-                        children=[
-                            dmc.Title("2D view", order=4),
-                        ],
-                    ),
-                    dcc.Graph(id="cet-jan-dec-lines", style={"height": "50vh"}),
+                    dmc.Group(justify="space-between", children=[dmc.Title("2D view", order=4)]),
+                    dcc.Graph(id="cet-jan-dec-lines", style={"height": "45vh"}),
                 ],
             ),
 
@@ -78,12 +116,7 @@ def get_overview_layout(df_cet: pd.DataFrame):
                     dmc.Stack(
                         gap="xs",
                         children=[
-                            dmc.Group(
-                                justify="space-between",
-                                children=[
-                                    dmc.Title("3D view (LOESS surface)", order=4),
-                                ],
-                            ),
+                            dmc.Group(justify="space-between", children=[dmc.Title("3D view (LOESS surface)", order=4)]),
                             dmc.Text(
                                 "A smoothed surface of the same monthly data, coloured by anomaly relative to the baseline.",
                                 size="sm",

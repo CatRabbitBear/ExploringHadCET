@@ -3,6 +3,7 @@ import dash_mantine_components as dmc
 from dash import html, dcc
 
 from app_core.app_state import make_app_state_store
+from app_core.theme import THEME
 
 
 SECTIONS = [
@@ -15,11 +16,6 @@ SECTIONS = [
 
 
 def get_shell_layout(df_cet: pd.DataFrame):
-    theme = {
-        "fontFamily": "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
-        "primaryColor": "blue",
-        "defaultRadius": "md",
-    }
 
     def desktop_nav():
         # link-based "pills"
@@ -70,19 +66,20 @@ def get_shell_layout(df_cet: pd.DataFrame):
         )
 
     return dmc.MantineProvider(
-        theme=theme,
+        theme=THEME,
         children=[
             dcc.Location(id="url", refresh=False),
             make_app_state_store(),
 
             dmc.Box(
-                style={
-                    "position": "sticky",
-                    "top": 0,
-                    "zIndex": 1000,
-                    "background": "var(--mantine-color-body)",
-                    "borderBottom": "1px solid var(--mantine-color-gray-3)",
-                },
+                # style={
+                #     "position": "sticky",
+                #     "top": 0,
+                #     "zIndex": 1000,
+                #     "background": "var(--mantine-color-body)",
+                #     "borderBottom": "1px solid var(--mantine-color-gray-3)",
+                # },
+                className="app-header app-header--elevated",
                 children=[
                     dmc.Container(
                         size="lg",
