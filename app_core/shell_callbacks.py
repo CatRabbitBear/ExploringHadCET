@@ -2,9 +2,10 @@ from dash import Output, Input, State, ctx, no_update
 import dash_mantine_components as dmc
 
 from pages.overview.page import get_overview_layout
+from pages.exceptional.page import get_exceptional_layout
+from pages.winter.page import get_winter_layout
+
 # later:
-# from pages.exceptional.page import get_exceptional_layout
-# from pages.winter.page import get_winter_layout
 # from pages.rainfall.page import get_rainfall_layout
 # from pages.methodology.page import get_methodology_layout
 
@@ -72,9 +73,15 @@ def register_page_router_callback(app, df_cet):
         if section == "overview":
             return get_overview_layout(df_cet)
 
+        if section == "exceptional":
+            return get_exceptional_layout(df_cet)
+
+        if section == "winter":
+            return get_winter_layout(df_cet)
+
         title_map = {
-            "exceptional": "Exceptional Months",
-            "winter": "Winter in Focus",
+            # "exceptional": "Exceptional Months",
+            # "winter": "Winter in Focus",
             "rainfall": "Monthly Rainfall",
             "method": "Methodology",
         }

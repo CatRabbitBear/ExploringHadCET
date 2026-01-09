@@ -1,8 +1,8 @@
 from dash import Input, Output
 import pandas as pd
 
-from viz.figures.cet_2d import build_cet_2d_figure
-from viz.figures.cet_3d import build_cet_3d_figure
+from viz.figures.overview_2d import build_cet_2d_figure
+from viz.figures.overview_3d import build_cet_3d_figure
 
 
 def register_overview_callbacks(app, df_cet: pd.DataFrame):
@@ -69,6 +69,8 @@ def register_overview_callbacks(app, df_cet: pd.DataFrame):
             years_range=years_range,
             highlight_year=highlight_year,
             compare_year=compare_year,
+            start_month="Jan",
+            start_offset=0,
         )
         fig_3d = build_cet_3d_figure(df_cet, years_range)
 

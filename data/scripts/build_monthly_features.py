@@ -98,7 +98,7 @@ def read_monthly_tables(conn: sqlite3.Connection) -> pd.DataFrame:
 
     # Sort
     df = df.sort_values(["year", "month"]).reset_index(drop=True)
-
+    # print(df.columns)
     return df
 
 

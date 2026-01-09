@@ -1,0 +1,170 @@
+from dash import html, dcc
+import dash_mantine_components as dmc
+import pandas as pd
+
+
+def get_exceptional_layout(df_cet: pd.DataFrame):
+    years = sorted(df_cet["year"].unique().astype(int).tolist())
+    min_year, max_year = int(years[0]), int(years[-1])
+
+    return dmc.Stack(
+        gap="md",
+        children=[
+            dmc.Title("Exceptional Months", order=2),
+            dmc.Text(
+                "Top-ranked anomalous months for each calendar month. "
+                "Default colouring shows recency (green = recent).",
+                c="dimmed",
+            ),
+
+            # --- Controls ---
+            dmc.Card(
+                withBorder=True,
+                shadow="sm",
+                radius="md",
+                children=dmc.Stack(
+                    gap="sm",
+                    children=[
+                        dmc.Group(
+                            justify="space-between",
+                            align="center",
+                            children=[
+                                dmc.Switch(
+                                    id="exc-more-detail",
+                                    label="More detail",
+                                    description="Show mean temp and anomaly in each cell.",
+                                    checked=False,
+                                ),
+                                dmc.Badge(f"Data: {min_year}–{max_year}", variant="light"),
+                            ],
+                        ),
+
+                        dmc.Accordion(
+                            variant="separated",
+                            radius="md",
+                            children=[
+                                dmc.AccordionItem(
+                                    [
+                                        dmc.AccordionControl("Advanced"),
+                                        dmc.AccordionPanel(
+                                            dmc.Stack(
+                                                gap="sm",
+                                                children=[
+                                                    dmc.Group(
+                                                        justify="space-between",
+                                                        align="center",
+                                                        children=[
+                                                            dmc.Switch(
+                                                                id="exc-color-by",
+                                                                checked=False,
+                                                                label="Colour by anomaly (RdBu)",
+                                                                description="Overrides recency colouring.",
+                                                            ),
+                                                            dmc.Text("Top N per month", fw=600),
+                                                        ],
+                                                    ),
+                                                    dmc.Slider(
+                                                        id="exc-top-n",
+                                                        value=3,
+                                                        min=3,
+                                                        max=12,
+                                                        step=1,
+                                                        marks=[
+                                                            {"value": 3, "label": "3"},
+                                                            {"value": 5, "label": "5"},
+                                                            {"value": 10, "label": "10"},
+                                                            {"value": 12, "label": "12"},
+                                                        ],
+                                                    ),
+                                                ],
+                                            )
+                                        ),
+                                    ],
+                                    value="advanced",
+                                )
+                            ],
+                        ),
+                    ],
+                ),
+            ),
+
+            # --- Warm section: table then timeline ---
+            dmc.Card(
+                withBorder=True,
+                shadow="sm",
+                radius="md",
+                children=dmc.Stack(
+                    gap="sm",
+                    children=[
+                        dmc.Group(
+                            justify="space-between",
+                            children=[
+                                dmc.Title("Warm anomalies", order=4),
+                                dmc.Badge("Ranked warmest-by-month", variant="light"),
+                            ],
+                        ),
+                        html.Div(id="exc-hot-grid"),
+
+                        dmc.Divider(my="xs"),
+
+                        dmc.Stack(
+                            gap=4,
+                            children=[
+                                dmc.Text("Warm timeline", fw=700),
+                                dmc.Text(
+                                    "Markers show when the top-ranked warm months occur in the record "
+                                    "(y-position is just rank; the focus is the year axis).",
+                                    size="sm",
+                                    c="dimmed",
+                                ),
+                                dcc.Graph(
+                                    id="exc-hot-timeline",
+                                    config={"displayModeBar": False},
+                                    style={"height": "240px"},
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+            ),
+
+            # --- Cold section: table then timeline ---
+            dmc.Card(
+                withBorder=True,
+                shadow="sm",
+                radius="md",
+                children=dmc.Stack(
+                    gap="sm",
+                    children=[
+                        dmc.Group(
+                            justify="space-between",
+                            children=[
+                                dmc.Title("Cold anomalies", order=4),
+                                dmc.Badge("Ranked coldest-by-month", variant="light"),
+                            ],
+                        ),
+                        html.Div(id="exc-cold-grid"),
+
+                        dmc.Divider(my="xs"),
+
+                        dmc.Stack(
+                            gap=4,
+                            children=[
+                                dmc.Text("Cold timeline", fw=700),
+                                dmc.Text(
+                                    "Same idea as above, for cold anomalies.",
+                                    size="sm",
+                                    c="dimmed",
+                                ),
+                                dcc.Graph(
+                                    id="exc-cold-timeline",
+                                    config={"displayModeBar": False},
+                                    style={"height": "240px"},
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+            ),
+        ],
+    )
