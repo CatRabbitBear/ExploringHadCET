@@ -11,7 +11,7 @@ from viz.figures.spaghetti_overlays import add_compare_year, add_highlight_year
 def build_cet_2d_figure(
     df_cet: pd.DataFrame,
     years_range: list[int],
-    highlight_year: int,
+    highlight_year: int | None = None,
     compare_year: int | None = None,
     *,
     start_month: str = "Jan",
@@ -35,6 +35,7 @@ def build_cet_2d_figure(
     # Overlays on top (no need to skip in base builder anymore)
     if compare_year is not None:
         fig = add_compare_year(fig, dff, int(compare_year))
-    fig = add_highlight_year(fig, dff, int(highlight_year))
+    if highlight_year is not None:
+        fig = add_highlight_year(fig, dff, int(highlight_year))
 
     return fig

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple, List, Union
+from typing import Tuple, List, Union, Sequence
 
 from app_core.color_utils import sample_colorscale
 
@@ -8,6 +8,10 @@ PlotlyColorscale = Union[str, List[list]]  # allow string or explicit list later
 def rgb(rgb_: Tuple[int, int, int]) -> str:
     r, g, b = rgb_
     return f"rgb({r},{g},{b})"
+
+def rgba(rgb_: Tuple[int, int, int], a: float = 1.0) -> str:
+    r, g, b = rgb_
+    return f"rgba({r},{g},{b},{a})"
 
 @dataclass(frozen=True)
 class UIPalette:
@@ -72,3 +76,22 @@ PLOT = PlotPalette(
     grid_3d="rgba(0,0,0,0.12)",
     history_grey=(160, 160, 160),
 )
+
+# Winter/era categorical colours
+WINTER_BUCKET_RGB: Sequence[Tuple[int, int, int]] = [
+    (31, 119, 180),  # blue
+    (255, 127, 14),  # orange
+    (44, 160, 44),   # green
+    (214, 39, 40),   # red
+    (148, 103, 189), # purple
+    (140, 86, 75),   # brown
+    (227, 119, 194), # pink
+    (127, 127, 127), # grey
+    (188, 189, 34),  # olive
+    (23, 190, 207),  # cyan
+]
+
+def winter_bucket_color(i: int, alpha: float = 0.9) -> str:
+    """Stable categorical colour for winter era buckets."""
+    rgb_ = WINTER_BUCKET_RGB[i % len(WINTER_BUCKET_RGB)]
+    return rgba(rgb_, alpha)

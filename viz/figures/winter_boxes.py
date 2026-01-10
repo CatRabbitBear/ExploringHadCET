@@ -4,36 +4,8 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from app_core.plot_theme import CLIMATE_TEMPLATE, layout_cet_2d
-
-
-DJF_MONTHS = {12, 1, 2}
-
-
-def _bucket_label(year: int, mode: str) -> str:
-    if mode == "century":
-        start = (year // 100) * 100
-        return f"{start}s"
-    if mode == "50y":
-        start = (year // 50) * 50
-        return f"{start}–{start+49}"
-    if mode == "25y":
-        start = (year // 25) * 25
-        return f"{start}–{start+24}"
-    # fallback
-    start = (year // 100) * 100
-    return f"{start}s"
-
-
-def _bucket_sort_key(label: str) -> int:
-    # Extract the first number for ordering
-    # "1700s" -> 1700, "1850–1899" -> 1850
-    digits = ""
-    for ch in label:
-        if ch.isdigit():
-            digits += ch
-        elif digits:
-            break
-    return int(digits) if digits else 0
+from app_core.palette import winter_bucket_color
+from viz.figures.winter_stats import DJF_MONTHS, bucket_label, _bucket_sort_key
 
 
 def build_winter_djf_boxplots(
@@ -48,38 +20,39 @@ def build_winter_djf_boxplots(
     if dff.empty:
         return go.Figure()
 
-    # Filter DJF only
     dff = dff[dff["month"].isin(DJF_MONTHS)].copy()
     if dff.empty:
         return go.Figure()
 
-    # Bucket per calendar year (good enough for now; we'll refine later if we want "winter-year" handling)
-    dff["bucket"] = dff["year"].astype(int).map(lambda y: _bucket_label(y, bucket_mode))
+    last_year = max(years_range)
+    dff["bucket"] = dff["year"].astype(int).map(lambda y: bucket_label(y, bucket_mode, last_year))
 
-    # Order buckets chronologically
     buckets = sorted(dff["bucket"].unique().tolist(), key=_bucket_sort_key)
 
-    # Consistent y-range with your CET layout
+    # For now, keep y-range global (your later step will introduce winter-only scaling)
     t_min = float(df_cet["tmean_c"].min())
     t_max = float(df_cet["tmean_c"].max())
     y_range = [t_min - 0.5, t_max + 0.5]
 
     fig = go.Figure()
 
-    # One box trace per bucket (categorical x)
-    for b in buckets:
+    for i, b in enumerate(buckets):
         vals = dff.loc[dff["bucket"] == b, "tmean_c"]
         if vals.empty:
             continue
 
+        c_line = winter_bucket_color(i, alpha=0.95)
+        c_fill = winter_bucket_color(i, alpha=0.18)
+
         fig.add_trace(
             go.Box(
                 y=vals,
-                x=[b] * len(vals),   # categorical
+                x=[b] * len(vals),
                 name=b,
-                boxpoints=False,     # keep clean; later we can add points toggle
+                boxpoints=False,
                 whiskerwidth=0.7,
-                line=dict(width=1.4),
+                line=dict(width=1.5, color=c_line),
+                fillcolor=c_fill,
                 showlegend=False,
                 hovertemplate=(
                     f"<b>{b}</b><br>"
@@ -91,7 +64,6 @@ def build_winter_djf_boxplots(
 
     fig.update_layout(template=CLIMATE_TEMPLATE)
     fig.update_layout(**layout_cet_2d(y_range))
-
     fig.update_layout(
         margin=dict(l=40, r=10, t=40, b=55),
         xaxis=dict(
@@ -100,9 +72,7 @@ def build_winter_djf_boxplots(
             categoryarray=buckets,
             title="Era bucket",
         ),
-        yaxis=dict(
-            title="Mean temperature (°C)",
-        ),
+        yaxis=dict(title="Mean temperature (°C)"),
     )
 
     return fig
