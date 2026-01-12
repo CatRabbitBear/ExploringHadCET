@@ -69,7 +69,14 @@ def compute_djf_bucket_stats(
 
     stats = (
         dff.groupby("bucket")["tmean_c"]
-        .agg(n="count", min_djf="min", max_djf="max")
+        .agg(
+            n="count",
+            min_djf="min",
+            max_djf="max",
+            q1=lambda s: float(s.quantile(0.25)),
+            median=lambda s: float(s.quantile(0.50)),
+            q3=lambda s: float(s.quantile(0.75)),
+        )
         .reset_index()
     )
 

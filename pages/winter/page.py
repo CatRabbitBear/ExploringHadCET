@@ -10,13 +10,20 @@ def get_winter_layout(df_cet: pd.DataFrame):
     return dmc.Stack(
         gap="md",
         children=[
-            dmc.Title("Winter in Focus – Workbench", order=2),
-            dmc.Text(
-                "Temporary layout to tune Phase A (Jul–Jun spaghetti) and Phase B (DJF boxplots by era) "
-                "before we merge them into a single guided visual.",
-                size="sm",
-                c="dimmed",
-            ),
+            dmc.Title("Winter in Focus", order=2),
+
+            # --- Stores ---
+            dcc.Store(id="winter-view-mode", storage_type="local"),   # "guided" | "final"
+            dcc.Store(id="winter-step", storage_type="memory"),       # 0..3
+            dcc.Store(id="winter-autoplay", storage_type="memory"),   # bool
+            dcc.Store(id="winter-is-mobile", storage_type="memory"),  # bool
+            dcc.Store(id="winter-tick-interval-ms", storage_type="memory"),
+
+            # --- Intervals ---
+            # Init tick runs once to detect mobile and initialise state
+            dcc.Interval(id="winter-init-tick", interval=50, n_intervals=0, max_intervals=1),
+            # Playback tick advances steps while autoplay is True
+            dcc.Interval(id="winter-tick", interval=900, n_intervals=0, disabled=True),
 
             dmc.Card(
                 withBorder=True,
@@ -34,7 +41,11 @@ def get_winter_layout(df_cet: pd.DataFrame):
                                         gap=2,
                                         children=[
                                             dmc.Text("View range", fw=600),
-                                            dmc.Text("Keep it fast and comparable.", size="sm", c="dimmed"),
+                                            dmc.Text(
+                                                "Same data as the overview, re-framed Jul→Jun so winter (DJF) sits in the middle.",
+                                                size="sm",
+                                                c="dimmed",
+                                            ),
                                         ],
                                     ),
                                     dmc.SegmentedControl(
@@ -58,9 +69,9 @@ def get_winter_layout(df_cet: pd.DataFrame):
                                     dmc.Stack(
                                         gap=2,
                                         children=[
-                                            dmc.Text("Era buckets (Phase B)", fw=600),
+                                            dmc.Text("Era buckets", fw=600),
                                             dmc.Text(
-                                                "Choose how distributions are grouped on the x-axis.",
+                                                "Auto picks 50-year for modern, century for full record.",
                                                 size="sm",
                                                 c="dimmed",
                                             ),
@@ -68,8 +79,9 @@ def get_winter_layout(df_cet: pd.DataFrame):
                                     ),
                                     dmc.SegmentedControl(
                                         id="winter-bucket-mode",
-                                        value="century",
+                                        value="auto",
                                         data=[
+                                            {"label": "Auto", "value": "auto"},
                                             {"label": "Centuries", "value": "century"},
                                             {"label": "50-year", "value": "50y"},
                                             {"label": "25-year", "value": "25y"},
@@ -78,7 +90,23 @@ def get_winter_layout(df_cet: pd.DataFrame):
                                 ],
                             ),
 
-                            dmc.Text(f"Data range: {min_year}–{max_year}", size="xs", c="dimmed"),
+                            dmc.Divider(),
+
+                            dmc.Group(
+                                justify="space-between",
+                                align="center",
+                                children=[
+                                    dmc.Text(f"Data range: {min_year}–{max_year}", size="xs", c="dimmed"),
+                                    dmc.Group(
+                                        gap="xs",
+                                        children=[
+                                            dmc.Button("Play", id="winter-btn-play", variant="filled"),
+                                            dmc.Button("Show final boxplots", id="winter-btn-final", variant="light"),
+                                            dmc.Button("Replay", id="winter-btn-replay", variant="subtle"),
+                                        ],
+                                    ),
+                                ],
+                            ),
                         ],
                     )
                 ],
@@ -92,33 +120,8 @@ def get_winter_layout(df_cet: pd.DataFrame):
                     dmc.Stack(
                         gap="xs",
                         children=[
-                            dmc.Group(justify="space-between", children=[dmc.Title("Phase A – Jul–Jun (winter centred)", order=4)]),
-                            dmc.Text(
-                                "Same year-lines idea as Overview, but the cycle starts in July so DJF sits in the middle.",
-                                size="sm",
-                                c="dimmed",
-                            ),
-                            dcc.Graph(id="winter-phase-a", style={"height": "45vh"}),
-                        ],
-                    )
-                ],
-            ),
-
-            dmc.Card(
-                withBorder=True,
-                shadow="sm",
-                radius="md",
-                children=[
-                    dmc.Stack(
-                        gap="xs",
-                        children=[
-                            dmc.Group(justify="space-between", children=[dmc.Title("Phase B – DJF distributions by era (boxplots)", order=4)]),
-                            dmc.Text(
-                                "Each box summarises winter months (Dec–Jan–Feb) for an era bucket, shown side-by-side.",
-                                size="sm",
-                                c="dimmed",
-                            ),
-                            dcc.Graph(id="winter-phase-b", style={"height": "45vh"}),
+                            dmc.Text(id="winter-caption", size="sm", c="dimmed"),
+                            dcc.Graph(id="winter-main-graph", style={"height": "58vh"}),
                         ],
                     )
                 ],

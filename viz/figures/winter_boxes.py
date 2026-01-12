@@ -12,6 +12,7 @@ def build_winter_djf_boxplots(
     df_cet: pd.DataFrame,
     years_range: list[int],
     bucket_mode: str = "century",
+    opacity: float = 1.0,
 ) -> go.Figure:
     if not years_range:
         return go.Figure()
@@ -59,13 +60,14 @@ def build_winter_djf_boxplots(
                     "DJF Temp: %{y:.2f} °C"
                     "<extra></extra>"
                 ),
+                opacity=opacity,
             )
         )
 
     fig.update_layout(template=CLIMATE_TEMPLATE)
     fig.update_layout(**layout_cet_2d(y_range))
     fig.update_layout(
-        margin=dict(l=40, r=10, t=40, b=55),
+        margin=dict(l=40, r=10, t=40, b=35),
         xaxis=dict(
             type="category",
             categoryorder="array",
