@@ -14,15 +14,12 @@ def get_winter_layout(df_cet: pd.DataFrame):
 
             # --- Stores ---
             dcc.Store(id="winter-view-mode", storage_type="local"),   # "guided" | "final"
-            dcc.Store(id="winter-step", storage_type="memory"),       # 0..3
-            dcc.Store(id="winter-autoplay", storage_type="memory"),   # bool
-            dcc.Store(id="winter-is-mobile", storage_type="memory"),  # bool
-            dcc.Store(id="winter-tick-interval-ms", storage_type="memory"),
+            dcc.Store(id="winter-step", storage_type="memory"),
+            dcc.Store(id="winter-autoplay", storage_type="memory"),
+            dcc.Store(id="winter-is-mobile", storage_type="memory"),
 
             # --- Intervals ---
-            # Init tick runs once to detect mobile and initialise state
             dcc.Interval(id="winter-init-tick", interval=50, n_intervals=0, max_intervals=1),
-            # Playback tick advances steps while autoplay is True
             dcc.Interval(id="winter-tick", interval=900, n_intervals=0, disabled=True),
 
             dmc.Card(
@@ -92,21 +89,7 @@ def get_winter_layout(df_cet: pd.DataFrame):
 
                             dmc.Divider(),
 
-                            dmc.Group(
-                                justify="space-between",
-                                align="center",
-                                children=[
-                                    dmc.Text(f"Data range: {min_year}–{max_year}", size="xs", c="dimmed"),
-                                    dmc.Group(
-                                        gap="xs",
-                                        children=[
-                                            dmc.Button("Play", id="winter-btn-play", variant="filled"),
-                                            dmc.Button("Show final boxplots", id="winter-btn-final", variant="light"),
-                                            dmc.Button("Replay", id="winter-btn-replay", variant="subtle"),
-                                        ],
-                                    ),
-                                ],
-                            ),
+                            dmc.Text(f"Data range: {min_year}–{max_year}", size="xs", c="dimmed"),
                         ],
                     )
                 ],
@@ -121,7 +104,30 @@ def get_winter_layout(df_cet: pd.DataFrame):
                         gap="xs",
                         children=[
                             dmc.Text(id="winter-caption", size="sm", c="dimmed"),
+
                             dcc.Graph(id="winter-main-graph", style={"height": "58vh"}),
+
+                            # --- Story controls (footer bar) ---
+                            dmc.Group(
+                                justify="space-between",
+                                align="center",
+                                mt="xs",
+                                children=[
+                                    dmc.Button("◀ Back", id="winter-btn-back", variant="subtle"),
+
+                                    dmc.Text(id="winter-step-indicator", size="sm", c="dimmed"),
+
+                                    dmc.Group(
+                                        gap="xs",
+                                        children=[
+                                            dmc.Button("Next ▶", id="winter-btn-next", variant="filled"),
+                                            dmc.Button("▶ Play", id="winter-btn-play", variant="light"),
+                                            dmc.Button("Show final", id="winter-btn-final", variant="light"),
+                                            dmc.Button("Reset ↺", id="winter-btn-reset", variant="subtle"),
+                                        ],
+                                    ),
+                                ],
+                            ),
                         ],
                     )
                 ],

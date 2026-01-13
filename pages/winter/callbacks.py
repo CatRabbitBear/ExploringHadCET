@@ -6,23 +6,23 @@ import pandas as pd
 from viz.figures.overview_2d import build_cet_2d_figure
 from viz.figures.winter_boxes import build_winter_djf_boxplots
 from viz.figures.winter_stats import compute_djf_bucket_stats
-from viz.figures.winter_overlays import add_djf_brackets
+from viz.figures.winter_overlays import add_djf_brackets, add_first_bracket_explainers
 
 from viz.figures.winter_layout_spec import BucketSpec
 from viz.figures.winter_transition import build_winter_transition_figure
 
 
-TRANSITION_START = 3
+# --- Phase structure ---
+PHASE_A_END = 3
+TRANSITION_START = PHASE_A_END + 1
 TRANSITION_FRAMES = 22
 TRANSITION_END = TRANSITION_START + TRANSITION_FRAMES - 1
 FINAL_STEP = TRANSITION_END + 1
 
 
-def ease_in_out_cubic(t: float) -> float:
-    return 4 * t * t * t if t < 0.5 else 1 - pow(-2 * t + 2, 3) / 2
-
 def ease_in_cubic(t: float) -> float:
     return t * t * t
+
 
 def _set_all_trace_opacity(fig, opacity: float) -> None:
     for tr in fig.data:
@@ -35,12 +35,8 @@ def _build_transition_specs(stats_df, buckets) -> list[BucketSpec]:
     if n == 0 or stats_df is None or stats_df.empty:
         return specs
 
-    # Start all brackets at a single x, slightly right-shifted (~half-month feel)
     x_anchor = (n - 1) / 2.0
-    # NOTE:
-    # Plotly categorical axes reserve padding at both ends.
-    # Empirically, the usable visual width behaves like (n + 1) slots,
-    # so we offset by (n + 1)/24 to align with the perceived Jan centre.
+    # Plotly categorical padding compensation: (n + 1) behaved best empirically
     x_offset = (n + 1) / 24.0
     x_start = x_anchor + x_offset
 
@@ -60,8 +56,8 @@ def _build_transition_specs(stats_df, buckets) -> list[BucketSpec]:
             BucketSpec(
                 bucket=b,
                 i=i,
-                x_start=x_start,      # identical start x for all buckets
-                x_end=float(i),       # land on bucket index
+                x_start=x_start,
+                x_end=float(i),
                 min_y=min_y,
                 max_y=max_y,
                 q1_y=q1,
@@ -74,13 +70,9 @@ def _build_transition_specs(stats_df, buckets) -> list[BucketSpec]:
 
 
 def lock_camera(fig, *, y_range, uirev: str, lock_x_autorange: bool):
-    # Keep view stable within a given axis-type "world"
     fig.update_layout(uirevision=uirev)
-
-    # Y is numeric: truly lock it
     fig.update_yaxes(range=y_range, autorange=False, fixedrange=True)
 
-    # X differs by plot type
     if lock_x_autorange:
         fig.update_xaxes(autorange=False, fixedrange=True)
     else:
@@ -125,33 +117,43 @@ def register_winter_callbacks(app, df_cet: pd.DataFrame):
             return False, FINAL_STEP, "final"
         return False, 0, "guided"
 
-    # --- 2) Buttons ---
+    # --- 2) Footer bar buttons: Back / Next / Play / Final / Reset ---
     @app.callback(
         Output("winter-autoplay", "data", allow_duplicate=True),
         Output("winter-step", "data", allow_duplicate=True),
         Output("winter-view-mode", "data", allow_duplicate=True),
+        Input("winter-btn-back", "n_clicks"),
+        Input("winter-btn-next", "n_clicks"),
         Input("winter-btn-play", "n_clicks"),
         Input("winter-btn-final", "n_clicks"),
-        Input("winter-btn-replay", "n_clicks"),
+        Input("winter-btn-reset", "n_clicks"),
         State("winter-step", "data"),
         prevent_initial_call=True,
     )
-    def handle_buttons(n_play, n_final, n_replay, step):
+    def handle_footer_buttons(n_back, n_next, n_play, n_final, n_reset, step):
         from dash import ctx
 
         trigger = ctx.triggered_id
         step = int(step) if step is not None else 0
 
+        # Reset is a hard return to guided step 0
+        if trigger == "winter-btn-reset":
+            return False, 0, "guided"
+
         if trigger == "winter-btn-final":
             return False, FINAL_STEP, "final"
 
-        if trigger == "winter-btn-replay":
-            return False, 0, "guided"
+        if trigger == "winter-btn-back":
+            return False, max(0, step - 1), "guided"
+
+        if trigger == "winter-btn-next":
+            # Step forward through Phase A only (and up to the pre-transition gate)
+            next_step = min(TRANSITION_START, step + 1)
+            return False, next_step, "guided"
 
         if trigger == "winter-btn-play":
-            if step >= FINAL_STEP:
-                step = 0
-            return True, step, "guided"
+            # Start autoplay from the transition start, regardless of current step
+            return True, TRANSITION_START, "guided"
 
         return no_update, no_update, no_update
 
@@ -164,7 +166,7 @@ def register_winter_callbacks(app, df_cet: pd.DataFrame):
     def toggle_interval(autoplay: bool | None):
         return not bool(autoplay)
 
-    # --- 4) Step advancement ---
+    # --- 4) Step advancement while autoplay is on ---
     @app.callback(
         Output("winter-step", "data", allow_duplicate=True),
         Output("winter-autoplay", "data", allow_duplicate=True),
@@ -177,14 +179,81 @@ def register_winter_callbacks(app, df_cet: pd.DataFrame):
         if not autoplay:
             return no_update, no_update
 
-        step = int(step) if step is not None else 0
+        step = int(step) if step is not None else TRANSITION_START
         step_next = step + 1
 
         if step_next >= FINAL_STEP:
-            return FINAL_STEP, False  # stop at final
+            return FINAL_STEP, False
         return step_next, True
 
-    # --- 5) Render (Phase A -> Transition -> Phase B) ---
+    # --- 5) Control bar state (show/hide/disable + indicator text) ---
+    @app.callback(
+        Output("winter-btn-back", "disabled"),
+        Output("winter-btn-next", "style"),
+        Output("winter-btn-play", "style"),
+        Output("winter-btn-reset", "style"),
+        Output("winter-step-indicator", "children"),
+        Input("winter-step", "data"),
+        Input("winter-autoplay", "data"),
+        Input("winter-view-mode", "data"),
+        prevent_initial_call=False,
+    )
+    def update_controls(step, autoplay, view_mode):
+        step = int(step or 0)
+        autoplay = bool(autoplay)
+        view_mode = view_mode if view_mode in ("guided", "final") else "guided"
+
+        # Back disabled only at very start
+        back_disabled = (step <= 0)
+
+        # Which “primary” control to show?
+        show_next = (step < TRANSITION_START) and (not autoplay) and (view_mode != "final")
+        show_play = (step == TRANSITION_START) and (not autoplay) and (view_mode != "final")
+        show_reset = (step >= FINAL_STEP) or (view_mode == "final") or autoplay
+
+        style_show = {"display": "inline-flex"}
+        style_hide = {"display": "none"}
+
+        next_style = style_show if show_next else style_hide
+        play_style = style_show if show_play else style_hide
+        reset_style = style_show if show_reset else style_hide
+
+        # Step indicator (simple and stable)
+        if view_mode == "final":
+            indicator = "Summary view"
+        elif autoplay:
+            indicator = "Playing…"
+        else:
+            # Guided: Phase A steps + a gate + final
+            if step < TRANSITION_START:
+                indicator = f"Step {step + 1} of {PHASE_A_END + 2}"
+            elif step == TRANSITION_START:
+                indicator = "Ready to animate"
+            elif TRANSITION_START <= step <= TRANSITION_END:
+                pct = int(100 * (step - TRANSITION_START) / max(1, (TRANSITION_FRAMES - 1)))
+                indicator = f"Animating… {pct}%"
+            else:
+                indicator = "Done"
+
+        return back_disabled, next_style, play_style, reset_style, indicator
+
+    # --- 6) Variable tick interval: fast during transition ---
+    @app.callback(
+        Output("winter-tick", "interval"),
+        Input("winter-step", "data"),
+        Input("winter-autoplay", "data"),
+        prevent_initial_call=False,
+    )
+    def set_tick_interval(step, autoplay):
+        if not autoplay:
+            return 900
+
+        step = int(step or TRANSITION_START)
+        if TRANSITION_START <= step <= TRANSITION_END:
+            return 120
+        return 900
+
+    # --- 7) Render ---
     @app.callback(
         Output("winter-main-graph", "figure"),
         Output("winter-caption", "children"),
@@ -214,36 +283,34 @@ def register_winter_callbacks(app, df_cet: pd.DataFrame):
 
         view_mode = view_mode if view_mode in ("guided", "final") else "guided"
         step = int(step) if step is not None else (FINAL_STEP if view_mode == "final" else 0)
+        if view_mode == "final":
+            step = FINAL_STEP
 
         # Global y-range for honesty (rescale is later)
         t_min = float(df_cet["tmean_c"].min())
         t_max = float(df_cet["tmean_c"].max())
         y_range = [t_min - 0.5, t_max + 0.5]
 
-        # Captions
-        captions = {
-            0: "Step 0: Same data as the overview, re-framed Jul→Jun so winter (DJF) sits in the middle.",
-            1: "Step 1: Coloured brackets show the coldest and warmest DJF month within each era bucket.",
-            2: "Step 2: Focus on the winter brackets — the background context fades back.",
-        }
-
-        # Add one caption per transition frame (3..TRANSITION_END)
-        for k in range(TRANSITION_START, TRANSITION_END + 1):
-            frac = (k - TRANSITION_START + 1) / TRANSITION_FRAMES
-            captions[k] = f"Step 2: Brackets separate into era buckets… ({int(frac * 100)}%)"
-
-        captions[FINAL_STEP] = "Step 3: Final DJF boxplots by era (scale adjustment comes next)."
-        caption = captions.get(step, captions[0])
-
-        if view_mode == "final":
-            step = FINAL_STEP
-
         # Shared stats (min/max + quartiles)
         stats_df, buckets = compute_djf_bucket_stats(df_cet, years_range, bucket_mode=bucket_mode_eff)
         specs = _build_transition_specs(stats_df, buckets)
 
+        # Captions (keep simple for now)
+        if step == 0:
+            caption = "Step 1: Same data as the overview, re-framed Jul→Jun so winter (DJF) sits in the middle."
+        elif step == 1:
+            caption = "Step 2: Each bracket captures the warmest and coldest winter month for that period."
+        elif step == 2:
+            caption = "Step 3: Coloured brackets show the coldest and warmest DJF month within each era bucket."
+        elif step == 3:
+            caption = "Step 4: Focus on the winter brackets — the background context fades back."
+        elif TRANSITION_START <= step <= TRANSITION_END:
+            caption = "Now the brackets separate into era buckets and evolve into boxplots."
+        else:
+            caption = "Final: DJF boxplots by era (scale adjustment comes next)."
+
         # --- Phase A ---
-        if step <= 2:
+        if step <= PHASE_A_END:
             fig = build_cet_2d_figure(
                 df_cet,
                 years_range=years_range,
@@ -255,9 +322,25 @@ def register_winter_callbacks(app, df_cet: pd.DataFrame):
             fig.update_layout(title=None, showlegend=False)
 
             if step >= 1:
+                fig = add_djf_brackets(
+                    fig,
+                    stats_df=stats_df,
+                    buckets=buckets,
+                    show_labels=True,
+                    label_every=1,
+                    max_buckets=1,
+                )
+
+                fig = add_first_bracket_explainers(
+                    fig,
+                    stats_df=stats_df,
+                    buckets=buckets,
+                )
+
+            if step >= 2:
                 fig = add_djf_brackets(fig, stats_df=stats_df, buckets=buckets, show_labels=True, label_every=1)
 
-            if step == 2:
+            if step == 3:
                 _set_all_trace_opacity(fig, 0.08)
 
             fig = lock_camera(fig, y_range=y_range, uirev="winter_cat_v1", lock_x_autorange=False)
@@ -267,7 +350,6 @@ def register_winter_callbacks(app, df_cet: pd.DataFrame):
         if TRANSITION_START <= step <= TRANSITION_END:
             denom = max(1, (TRANSITION_FRAMES - 1))
             t = (step - TRANSITION_START) / denom
-            # t = ease_in_out_cubic(t)
             t = ease_in_cubic(t)
 
             show_boxes = t >= 0.45
@@ -292,18 +374,3 @@ def register_winter_callbacks(app, df_cet: pd.DataFrame):
         fig_b.update_layout(title=None)
         fig_b = lock_camera(fig_b, y_range=y_range, uirev="winter_cat_v1", lock_x_autorange=False)
         return fig_b, caption
-
-    # --- 6) Variable tick interval: fast during transition ---
-    @app.callback(
-        Output("winter-tick", "interval"),
-        Input("winter-step", "data"),
-        Input("winter-autoplay", "data"),
-    )
-    def set_tick_interval(step, autoplay):
-        if not autoplay:
-            return 900  # default (disabled anyway)
-
-        step = int(step or 0)
-        if TRANSITION_START <= step <= TRANSITION_END:
-            return 120
-        return 1200
