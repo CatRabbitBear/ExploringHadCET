@@ -4,9 +4,9 @@ import dash_mantine_components as dmc
 from pages.overview.page import get_overview_layout
 from pages.exceptional.page import get_exceptional_layout
 from pages.winter.page import get_winter_layout
-
+from pages.rainfall.page import get_rainfall_layout
 # later:
-# from pages.rainfall.page import get_rainfall_layout
+#
 # from pages.methodology.page import get_methodology_layout
 
 
@@ -79,10 +79,13 @@ def register_page_router_callback(app, df_cet):
         if section == "winter":
             return get_winter_layout(df_cet)
 
+        if section == "rainfall":
+            return get_rainfall_layout()
+
         title_map = {
             # "exceptional": "Exceptional Months",
             # "winter": "Winter in Focus",
-            "rainfall": "Monthly Rainfall",
+            # "rainfall": "Monthly Rainfall",
             "method": "Methodology",
         }
         return dmc.Card(

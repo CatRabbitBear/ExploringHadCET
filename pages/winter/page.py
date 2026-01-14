@@ -123,6 +123,7 @@ def get_winter_layout(df_cet: pd.DataFrame):
                                             dmc.Button("Next ▶", id="winter-btn-next", variant="filled"),
                                             dmc.Button("▶ Play", id="winter-btn-play", variant="light"),
                                             dmc.Button("Show final", id="winter-btn-final", variant="light"),
+                                            dmc.Button("Resize y-axis", id="winter-btn-resize", variant="light"),
                                             dmc.Button("Reset ↺", id="winter-btn-reset", variant="subtle"),
                                         ],
                                     ),
