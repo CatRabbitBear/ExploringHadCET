@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 import plotly.graph_objs as go
 
-from app_core.plot_theme import CLIMATE_TEMPLATE, layout_cet_2d
+from app_core.plotly_theme import CLIMATE_TEMPLATE, layout_cet_2d
 from viz.utils import make_year_to_alpha
 
 

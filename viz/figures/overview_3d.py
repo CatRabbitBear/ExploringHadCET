@@ -2,16 +2,18 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from data import get_surface_grids
-from app_core.plot_theme import CLIMATE_TEMPLATE, layout_cet_3d
-from app_core.palette import CLIMATE
+from app_core.plotly_theme import CLIMATE_TEMPLATE, layout_cet_3d
+from app_core.tokens_colors import CLIMATE
 
 
 LOESS_COL = "tmean_loess_0p07_c"
-BASELINE_COL = "tmean_base_1961_1990_c"   # month-specific baseline mean
-SURF_COL = "tmean_loess_anom_1961_1990_c" # computed on the fly below
+BASELINE_COL = "tmean_base_1961_1990_c"  # month-specific baseline mean
+SURF_COL = "tmean_loess_anom_1961_1990_c"  # computed on the fly below
 
 
-def build_cet_3d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) -> go.Figure:
+def build_cet_3d_figure(
+    df_cet: pd.DataFrame, selected_years: list[int] | None
+) -> go.Figure:
     if not selected_years:
         selected_years = [int(df_cet["year"].max())]
 
@@ -66,8 +68,20 @@ def build_cet_3d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) 
     fig3d = go.Figure()
 
     month_vals = list(range(1, 13))
-    month_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    month_labels = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+    ]
 
     if Z_grid.size > 0:
         fig3d.add_trace(
@@ -87,7 +101,13 @@ def build_cet_3d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) 
                     thickness=14,
                 ),
                 contours=dict(
-                    z=dict(show=True, usecolormap=False, highlight=False, color="rgba(0,0,0,0.25)", project=dict(z=False))
+                    z=dict(
+                        show=True,
+                        usecolormap=False,
+                        highlight=False,
+                        color="rgba(0,0,0,0.25)",
+                        project=dict(z=False),
+                    )
                 ),
                 lighting=dict(
                     ambient=0.9,
@@ -116,9 +136,7 @@ def build_cet_3d_figure(df_cet: pd.DataFrame, selected_years: list[int] | None) 
     fig3d.update_layout(
         margin=dict(l=0, r=0, t=10, b=0),
         scene=dict(
-            camera=dict(
-                eye=dict(x=1.6, y=1.35, z=0.9)
-            ),
+            camera=dict(eye=dict(x=1.6, y=1.35, z=0.9)),
             aspectratio=dict(x=1.1, y=1.8, z=0.8),
         ),
     )

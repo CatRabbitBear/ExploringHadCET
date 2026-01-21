@@ -4,7 +4,7 @@ from dash import html, dcc
 
 from app_core.app_state import make_app_state_store
 from app_core.view_range import make_view_range_store
-from app_core.theme import THEME
+from app_core.mantine_theme import THEME
 
 
 SECTIONS = [
@@ -74,7 +74,6 @@ def get_shell_layout(df_cet: pd.DataFrame):
             dcc.Location(id="url", refresh=False),
             make_app_state_store(),
             make_view_range_store(min_year=min_year, max_year=max_year),
-
             dmc.Box(
                 # style={
                 #     "position": "sticky",
@@ -105,15 +104,26 @@ def get_shell_layout(df_cet: pd.DataFrame):
                                         gap="xs",
                                         align="center",
                                         children=[
-                                            dmc.Text("Years shown", size="sm", c="dimmed"),
+                                            dmc.Text(
+                                                "Years shown", size="sm", c="dimmed"
+                                            ),
                                             dmc.SegmentedControl(
                                                 id="global-range-preset",
                                                 value="modern",
                                                 size="xs",
                                                 data=[
-                                                    {"label": "Modern era", "value": "modern"},
-                                                    {"label": "Instrumental era", "value": "instrumental"},
-                                                    {"label": "Full record", "value": "full"},
+                                                    {
+                                                        "label": "Modern era",
+                                                        "value": "modern",
+                                                    },
+                                                    {
+                                                        "label": "Instrumental era",
+                                                        "value": "instrumental",
+                                                    },
+                                                    {
+                                                        "label": "Full record",
+                                                        "value": "full",
+                                                    },
                                                 ],
                                             ),
                                         ],
@@ -126,7 +136,6 @@ def get_shell_layout(df_cet: pd.DataFrame):
                     )
                 ],
             ),
-
             dmc.Container(
                 size="lg",
                 px="md",
