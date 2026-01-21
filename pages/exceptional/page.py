@@ -4,9 +4,6 @@ import pandas as pd
 
 
 def get_exceptional_layout(df_cet: pd.DataFrame):
-    years = sorted(df_cet["year"].unique().astype(int).tolist())
-    min_year, max_year = int(years[0]), int(years[-1])
-
     return dmc.Stack(
         gap="md",
         children=[
@@ -35,7 +32,7 @@ def get_exceptional_layout(df_cet: pd.DataFrame):
                                     description="Show mean temp and anomaly in each cell.",
                                     checked=False,
                                 ),
-                                dmc.Badge(f"Data: {min_year}–{max_year}", variant="light"),
+                                dmc.Badge(id="exc-view-range", variant="light"),
                             ],
                         ),
 

@@ -10,6 +10,7 @@ from viz.figures.winter_overlays import add_djf_brackets, add_first_bracket_expl
 
 from viz.figures.winter_layout_spec import BucketSpec
 from viz.figures.winter_transition import build_winter_transition_figure
+from app_core.view_range import get_view_range
 
 
 # --- Phase structure ---
@@ -274,27 +275,28 @@ def register_winter_callbacks(app, df_cet: pd.DataFrame):
     @app.callback(
         Output("winter-main-graph", "figure"),
         Output("winter-caption", "children"),
-        Input("winter-range-preset", "value"),
+        Input("global-view-range", "data"),
         Input("winter-bucket-mode", "value"),
         Input("winter-view-mode", "data"),
         Input("winter-step", "data"),
     )
-    def render_winter(range_preset: str, bucket_mode: str, view_mode: str | None, step: int | None):
-        # Range selection
-        if range_preset == "modern":
-            start, end = max(1950, min_year), max_year
-        elif range_preset == "instrumental":
-            start, end = max(1772, min_year), max_year
-        elif range_preset == "full":
-            start, end = min_year, max_year
+    def render_winter(view_range_data, bucket_mode: str, view_mode: str | None, step: int | None):
+        view_range = get_view_range(view_range_data, min_year=min_year, max_year=max_year)
+        start, end = view_range.start_year, view_range.end_year
+        if start == max(1950, min_year) and end == max_year:
+            range_key = "modern"
+        elif start == max(1772, min_year) and end == max_year:
+            range_key = "instrumental"
+        elif start == min_year and end == max_year:
+            range_key = "full"
         else:
-            start, end = max(1950, min_year), max_year
+            range_key = "custom"
 
         years_range = list(range(start, end + 1))
 
         # Bucket defaults
         if bucket_mode == "auto" or bucket_mode is None:
-            bucket_mode_eff = "50y" if range_preset == "modern" else "century"
+            bucket_mode_eff = "50y" if range_key == "modern" else "century"
         else:
             bucket_mode_eff = bucket_mode
 

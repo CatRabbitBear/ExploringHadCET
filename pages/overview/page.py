@@ -27,35 +27,6 @@ def get_overview_layout(df_cet: pd.DataFrame):
                                     dmc.Stack(
                                         gap=2,
                                         children=[
-                                            dmc.Text("View range", fw=600),
-                                            dmc.Text(
-                                                "Presets keep the charts fast and the story consistent.",
-                                                size="sm",
-                                                c="dimmed",
-                                            ),
-                                        ],
-                                    ),
-                                    dmc.SegmentedControl(
-                                        id="cet-range-preset",
-                                        value="modern",
-                                        data=[
-                                            {"label": "Modern era", "value": "modern"},
-                                            {"label": "Instrumental era", "value": "instrumental"},
-                                            {"label": "Full record", "value": "full"},
-                                        ],
-                                    ),
-                                ],
-                            ),
-
-                            dmc.Divider(),
-
-                            dmc.Group(
-                                justify="space-between",
-                                align="end",
-                                children=[
-                                    dmc.Stack(
-                                        gap=2,
-                                        children=[
                                             dmc.Text("2D highlight", fw=600),
                                             dmc.Text(
                                                 "One year stands out against the full context.",

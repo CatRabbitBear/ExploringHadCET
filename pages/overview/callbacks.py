@@ -3,6 +3,7 @@ import pandas as pd
 
 from viz.figures.overview_2d import build_cet_2d_figure
 from viz.figures.overview_3d import build_cet_3d_figure
+from app_core.view_range import get_view_range
 
 
 def register_overview_callbacks(app, df_cet: pd.DataFrame):
@@ -19,20 +20,13 @@ def register_overview_callbacks(app, df_cet: pd.DataFrame):
     @app.callback(
         Output("cet-jan-dec-lines", "figure"),
         Output("cet-3d-lines", "figure"),
-        Input("cet-range-preset", "value"),
+        Input("global-view-range", "data"),
         Input("cet-highlight-mode", "value"),
         Input("cet-highlight-year", "value"),
     )
-    def update_overview(range_preset: str, highlight_mode: str, highlight_year_value: str | None):
-        # --- range selection ---
-        if range_preset == "modern":
-            start, end = max(1950, min_year), max_year
-        elif range_preset == "instrumental":
-            start, end = max(1772, min_year), max_year
-        elif range_preset == "full":
-            start, end = min_year, max_year
-        else:
-            start, end = max(1950, min_year), max_year
+    def update_overview(view_range_data, highlight_mode: str, highlight_year_value: str | None):
+        view_range = get_view_range(view_range_data, min_year=min_year, max_year=max_year)
+        start, end = view_range.start_year, view_range.end_year
 
         years_range = list(range(start, end + 1))
         years_set = set(years_range)

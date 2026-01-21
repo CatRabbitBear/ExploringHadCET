@@ -30,34 +30,6 @@ def get_winter_layout(df_cet: pd.DataFrame):
                     dmc.Stack(
                         gap="sm",
                         children=[
-                            dmc.Group(
-                                justify="space-between",
-                                align="end",
-                                children=[
-                                    dmc.Stack(
-                                        gap=2,
-                                        children=[
-                                            dmc.Text("View range", fw=600),
-                                            dmc.Text(
-                                                "Same data as the overview, re-framed Jul→Jun so winter (DJF) sits in the middle.",
-                                                size="sm",
-                                                c="dimmed",
-                                            ),
-                                        ],
-                                    ),
-                                    dmc.SegmentedControl(
-                                        id="winter-range-preset",
-                                        value="modern",
-                                        data=[
-                                            {"label": "Modern era", "value": "modern"},
-                                            {"label": "Instrumental era", "value": "instrumental"},
-                                            {"label": "Full record", "value": "full"},
-                                        ],
-                                    ),
-                                ],
-                            ),
-
-                            dmc.Divider(),
 
                             dmc.Group(
                                 justify="space-between",

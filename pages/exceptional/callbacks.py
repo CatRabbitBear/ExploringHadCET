@@ -7,6 +7,7 @@ import plotly.graph_objs as go
 from dash import Input, Output
 
 from app_core.palette import CLIMATE, UI
+from app_core.view_range import get_view_range
 
 ANOM_COL = "tmean_anom_1961_1990_c"
 BASE_COL = "tmean_base_1961_1990_c"
@@ -364,6 +365,8 @@ def build_exceptional_grid(
     top_n: int,
     detailed: bool,
     color_by_anom: bool,
+    min_year: int | None = None,
+    max_year: int | None = None,
 ) -> dmc.SimpleGrid:
     required = {"year", "month", ANOM_COL, TMEAN_COL}
     missing = required - set(df_cet.columns)
@@ -372,9 +375,10 @@ def build_exceptional_grid(
 
     dff = df_cet.dropna(subset=[ANOM_COL, TMEAN_COL]).copy()
 
-    # Recency scaling should be based on the *full* dataset to keep meaning stable
-    years_all = df_cet["year"].dropna().astype(int)
-    min_year, max_year = int(years_all.min()), int(years_all.max())
+    # Recency scaling uses provided bounds when supplied.
+    if min_year is None or max_year is None:
+        years_all = df_cet["year"].dropna().astype(int)
+        min_year, max_year = int(years_all.min()), int(years_all.max())
 
     # rank labels + 12 month columns
     # Use responsive cols: 1 rank column + months (wrap on mobile)
@@ -419,24 +423,45 @@ def register_exceptional_callbacks(app, df_cet: pd.DataFrame):
         Output("exc-cold-grid", "children"),
         Output("exc-hot-timeline", "figure"),
         Output("exc-cold-timeline", "figure"),
+        Output("exc-view-range", "children"),
         Input("exc-more-detail", "checked"),
         Input("exc-top-n", "value"),
         Input("exc-color-by", "checked"),
+        Input("global-view-range", "data"),
     )
-    def update_exceptional(detailed: bool, top_n: int, color_by_anom: bool):
+    def update_exceptional(detailed: bool, top_n: int, color_by_anom: bool, view_range_data):
         top_n = int(top_n or 3)
         top_n = max(3, min(12, top_n))
+        view_range = get_view_range(view_range_data, min_year=min_year, max_year=max_year)
+        view_range_label = f"View: {view_range.start_year}:{view_range.end_year}"
+
+        df_view = df_cet[
+            (df_cet["year"].astype(int) >= view_range.start_year)
+            & (df_cet["year"].astype(int) <= view_range.end_year)
+        ]
 
         # 1) Build event lists ONCE (shared by grid + timeline)
-        hot_events = _compute_exceptional_events(df_cet, mode="warm", top_n=top_n)
-        cold_events = _compute_exceptional_events(df_cet, mode="cold", top_n=top_n)
+        hot_events = _compute_exceptional_events(df_view, mode="warm", top_n=top_n)
+        cold_events = _compute_exceptional_events(df_view, mode="cold", top_n=top_n)
 
         # 2) Grids (re-use your existing renderer)
         hot_grid = build_exceptional_grid(
-            df_cet, mode="warm", top_n=top_n, detailed=bool(detailed), color_by_anom=bool(color_by_anom)
+            df_view,
+            mode="warm",
+            top_n=top_n,
+            detailed=bool(detailed),
+            color_by_anom=bool(color_by_anom),
+            min_year=view_range.start_year,
+            max_year=view_range.end_year,
         )
         cold_grid = build_exceptional_grid(
-            df_cet, mode="cold", top_n=top_n, detailed=bool(detailed), color_by_anom=bool(color_by_anom)
+            df_view,
+            mode="cold",
+            top_n=top_n,
+            detailed=bool(detailed),
+            color_by_anom=bool(color_by_anom),
+            min_year=view_range.start_year,
+            max_year=view_range.end_year,
         )
 
         # 3) Timelines
@@ -445,16 +470,16 @@ def register_exceptional_callbacks(app, df_cet: pd.DataFrame):
             title="Hot months over time",
             mode="warm",
             color_by_anom=bool(color_by_anom),
-            min_year=min_year,
-            max_year=max_year,
+            min_year=view_range.start_year,
+            max_year=view_range.end_year,
         )
         cold_fig = _build_exceptional_timeline_figure(
             cold_events,
             title="Cold months over time",
             mode="cold",
             color_by_anom=bool(color_by_anom),
-            min_year=min_year,
-            max_year=max_year,
+            min_year=view_range.start_year,
+            max_year=view_range.end_year,
         )
 
-        return hot_grid, cold_grid, hot_fig, cold_fig
+        return hot_grid, cold_grid, hot_fig, cold_fig, view_range_label
