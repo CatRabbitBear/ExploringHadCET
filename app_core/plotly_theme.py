@@ -1,5 +1,5 @@
 from typing import Any, Dict, Sequence, Optional, Tuple
-from app_core.palette import PLOT, CLIMATE
+from app_core.tokens_colors import PLOT, CLIMATE
 
 CLIMATE_TEMPLATE: Dict[str, Any] = {
     "layout": {
@@ -18,115 +18,11 @@ CLIMATE_TEMPLATE: Dict[str, Any] = {
         "yaxis": {"zeroline": False},
     }
 }
-# from __future__ import annotations
-#
-# from typing import Any, Dict, List, Optional, Sequence, Tuple
-#
-# class dotdict(dict):
-#     """dot.notation access to dictionary attributes"""
-#     __getattr__ = dict.get
-#     __setattr__ = dict.__setitem__
-#     __delattr__ = dict.__delitem__
-#
-#
-# # ----------------------------
-# # Colour palette
-# # ----------------------------
-#
-# COLORS = dotdict({
-#
-#     # General backgrounds
-#     "background": dotdict({
-#         "paper": "#ffffff",
-#         "plot": "#f8f9fb",
-#         "scene": "rgb(245,245,245)",
-#     }),
-#
-#     # Historical / non-highlighted lines
-#     "history": dotdict({
-#         "grey_rgb": (160, 160, 160),
-#         "alpha_min": 0.03,
-#         "alpha_max": 0.18,
-#     }),
-#
-#     # Highlight lines
-#     "highlight": dotdict({
-#         "first_last": None,  # computed via anomaly colouring
-#         "reference_green": "rgba(80, 140, 110, 1.0)",
-#     }),
-#
-#     # Anomaly colour anchors (used by make_anomaly_to_rgb)
-#     "anomaly": dotdict({
-#         "neutral_rgb": (120, 120, 120),
-#         "cool_rgb": (120, 160, 210),
-#         "warm_rgb": (220, 150, 130),
-#         "range_c": 3.0,
-#     }),
-#
-#     "legend": dotdict({
-#         "bg": "rgba(255,255,255,0.85)",
-#         "border": "rgba(0,0,0,0.12)"
-#     }),
-#
-#     # LOESS / surface
-#     "surface": dotdict({
-#         "colorscale": [
-#             [0.0, "#f2f2f2"],
-#             [1.0, "#a8a8a8"],
-#         ],
-#         "opacity": 0.45,
-#     }),
-#
-#     # Grid lines
-#     "grid": dotdict({
-#         "two_d": "rgba(0,0,0,0.08)",
-#         "three_d": "rgba(0,0,0,0.12)",
-#     }),
-# })
-#
-#
-# # ----------------------------
-# # Base colours / constants
-# # ----------------------------
-#
-# # PAPER_BG = "#ffffff"
-# # PLOT_BG = "#f8f9fb"
-# #
-# # GRID_2D = "rgba(0,0,0,0.08)"
-# # GRID_3D_Z = "rgba(0,0,0,0.12)"
-# #
-# # LEGEND_BG = "rgba(255,255,255,0.85)"
-# # LEGEND_BORDER = "rgba(0,0,0,0.12)"
-# #
-# # # If you want consistent greys across charts
-# # GREY_LINE_RGB = (160, 160, 160)
-#
-#
-# # ----------------------------
-# # Plotly template (broad strokes only)
-# # ----------------------------
-#
-# CLIMATE_TEMPLATE: Dict[str, Any] = {
-#     "layout": {
-#         "paper_bgcolor": COLORS.background.paper,
-#         "plot_bgcolor": COLORS.background.plot,
-#         # Keep fonts neutral; tweak later if you pick a site-wide font
-#         "font": {"family": "system-ui, -apple-system, Segoe UI, Roboto, Arial", "size": 12},
-#         "hoverlabel": {
-#             "bgcolor": "rgba(255,255,255,0.95)",
-#             "bordercolor": "rgba(0,0,0,0.15)",
-#             "font": {"color": "rgba(0,0,0,0.85)"},
-#         },
-#         # These apply to 2D axes unless overridden
-#         "xaxis": {"zeroline": False},
-#         "yaxis": {"zeroline": False},
-#     }
-# }
-#
-#
+
 # ----------------------------
 # Reusable layout dict helpers
 # ----------------------------
+
 
 def layout_cet_2d(y_range: Sequence[float]) -> Dict[str, Any]:
     """
@@ -228,8 +124,49 @@ def layout_cet_3d(
 
 
 # ----------------------------
+# Timeline layout helpers
+# ----------------------------
+
+
+def layout_timeline(title: str, *, height: int) -> Dict[str, Any]:
+    """
+    Standard layout for compact timeline plots.
+    """
+    return {
+        "title": {"text": title, "x": 0.0, "xanchor": "left", "font": {"size": 16}},
+        "margin": {"l": 10, "r": 10, "t": 45, "b": 30},
+        "height": height,
+        "xaxis": {
+            "title": "Year",
+            "showgrid": True,
+            "gridcolor": PLOT.grid_2d,
+            "zeroline": False,
+        },
+        "yaxis": {
+            "visible": False,
+            "showgrid": False,
+            "zeroline": False,
+        },
+    }
+
+
+def colorbar_standard(
+    title: str,
+    *,
+    length: float = 0.75,
+    thickness: int = 14,
+) -> Dict[str, Any]:
+    return {"title": title, "len": length, "thickness": thickness}
+
+
+def contour_line_color(alpha: float = 0.25) -> str:
+    return rgba(PLOT.contour_rgb, alpha)
+
+
+# ----------------------------
 # Small trace-style helpers (optional)
 # ----------------------------
+
 
 def rgba(rgb: Tuple[int, int, int], a: float) -> str:
     r, g, b = rgb

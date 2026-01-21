@@ -3,8 +3,8 @@ from __future__ import annotations
 import pandas as pd
 import plotly.graph_objs as go
 
-from app_core.plot_theme import CLIMATE_TEMPLATE, layout_cet_2d
-from app_core.palette import winter_bucket_color
+from app_core.plotly_theme import CLIMATE_TEMPLATE, layout_cet_2d
+from app_core.tokens_colors import winter_bucket_color
 from viz.figures.winter_stats import DJF_MONTHS, bucket_label, _bucket_sort_key
 
 
@@ -26,7 +26,9 @@ def build_winter_djf_boxplots(
         return go.Figure()
 
     last_year = max(years_range)
-    dff["bucket"] = dff["year"].astype(int).map(lambda y: bucket_label(y, bucket_mode, last_year))
+    dff["bucket"] = (
+        dff["year"].astype(int).map(lambda y: bucket_label(y, bucket_mode, last_year))
+    )
 
     buckets = sorted(dff["bucket"].unique().tolist(), key=_bucket_sort_key)
 
@@ -56,9 +58,7 @@ def build_winter_djf_boxplots(
                 fillcolor=c_fill,
                 showlegend=False,
                 hovertemplate=(
-                    f"<b>{b}</b><br>"
-                    "DJF Temp: %{y:.2f} °C"
-                    "<extra></extra>"
+                    f"<b>{b}</b><br>" "DJF Temp: %{y:.2f} °C" "<extra></extra>"
                 ),
                 opacity=opacity,
             )

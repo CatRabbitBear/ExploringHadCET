@@ -77,7 +77,7 @@ def get_winter_layout(df_cet: pd.DataFrame):
                         children=[
                             dmc.Text(id="winter-caption", size="sm", c="dimmed"),
 
-                            dcc.Graph(id="winter-main-graph", style={"height": "58vh"}),
+                            dcc.Graph(id="winter-main-graph", className="graph-story"),
 
                             # --- Story controls (footer bar) ---
                             dmc.Group(

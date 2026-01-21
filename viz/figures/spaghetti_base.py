@@ -3,7 +3,8 @@ from __future__ import annotations
 import pandas as pd
 import plotly.graph_objs as go
 
-from app_core.plot_theme import CLIMATE_TEMPLATE, layout_cet_2d
+from app_core.plotly_theme import CLIMATE_TEMPLATE, layout_cet_2d, legend_highlights
+from app_core.tokens_colors import PLOT, rgba
 from viz.utils import make_year_to_alpha
 
 
@@ -30,9 +31,7 @@ def build_spaghetti_base(
 
     fig = go.Figure()
 
-    bg_rgb = (140, 140, 140)
     bg_width = 1.0
-    r, gg, b = bg_rgb
 
     # IMPORTANT: sort by cycle_order, not month, to support Jul->Jun etc.
     for y, g in dff.groupby(group_col):
@@ -52,7 +51,7 @@ def build_spaghetti_base(
                 x=g["cycle_label"],
                 y=g["tmean_c"],
                 mode="lines",
-                line=dict(color=f"rgba({r},{gg},{b},{a})", width=bg_width),
+                line=dict(color=rgba(PLOT.history_grey, a), width=bg_width),
                 showlegend=False,
                 hoverinfo="skip",
             )
@@ -71,12 +70,7 @@ def build_spaghetti_base(
     # Your readability nudges (kept)
     fig.update_layout(
         margin=dict(l=40, r=10, t=40, b=35),
-        legend=dict(
-            title=dict(text="Highlighted"),
-            bgcolor="rgba(255,255,255,0.85)",
-            bordercolor="rgba(0,0,0,0.12)",
-            borderwidth=1,
-        ),
+        **legend_highlights(title="Highlighted"),
     )
 
     return fig

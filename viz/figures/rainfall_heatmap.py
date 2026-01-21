@@ -4,14 +4,28 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 
-from app_core.plot_theme import CLIMATE_TEMPLATE
+from app_core.plotly_theme import CLIMATE_TEMPLATE, colorbar_standard
 
 
-MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+MONTH_LABELS = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+]
 
 
-def _robust_range(z: np.ndarray, *, q_lo: float = 0.02, q_hi: float = 0.98) -> tuple[float, float]:
+def _robust_range(
+    z: np.ndarray, *, q_lo: float = 0.02, q_hi: float = 0.98
+) -> tuple[float, float]:
     """Quantile-based zmin/zmax to stop a few extreme months blowing out the scale."""
     flat = z[np.isfinite(z)]
     if flat.size == 0:
@@ -89,11 +103,7 @@ def build_rainfall_heatmap_figure(
             zmin=zmin,
             zmax=zmax,
             colorscale=colorscale,
-            colorbar=dict(
-                title=cbar_title,
-                len=0.75,
-                thickness=14,
-            ),
+            colorbar=colorbar_standard(cbar_title),
             # hovertemplate=(
             #     "Month: %{x}<br>"
             #     "Year: %{y}<br>"

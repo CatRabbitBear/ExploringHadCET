@@ -1,5 +1,5 @@
 import pandas as pd
-from app_core.palette import CLIMATE
+from app_core.tokens_colors import CLIMATE
 
 
 # def make_anomaly_to_rgb(clim_range: float = CLIMATE.anomaly_range_c):
@@ -28,7 +28,9 @@ from app_core.palette import CLIMATE
 #     return anomaly_to_rgb
 
 
-def make_year_to_alpha(df_cet: pd.DataFrame, alpha_min: float = 0.8, alpha_max: float = 0.95):
+def make_year_to_alpha(
+    df_cet: pd.DataFrame, alpha_min: float = 0.8, alpha_max: float = 0.95
+):
     min_year = int(df_cet["year"].min())
     max_year = int(df_cet["year"].max())
 

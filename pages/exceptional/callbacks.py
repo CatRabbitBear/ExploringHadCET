@@ -6,7 +6,8 @@ import dash_mantine_components as dmc
 import plotly.graph_objs as go
 from dash import Input, Output
 
-from app_core.palette import CLIMATE, UI
+from app_core.tokens_colors import CLIMATE, UI, RECENCY, PLOT
+from app_core.plotly_theme import CLIMATE_TEMPLATE, layout_timeline
 from app_core.view_range import get_view_range
 
 ANOM_COL = "tmean_anom_1961_1990_c"
@@ -14,15 +15,19 @@ BASE_COL = "tmean_base_1961_1990_c"
 TMEAN_COL = "tmean_c"
 
 MONTHS = [
-    (1, "Jan"), (2, "Feb"), (3, "Mar"), (4, "Apr"),
-    (5, "May"), (6, "Jun"), (7, "Jul"), (8, "Aug"),
-    (9, "Sep"), (10, "Oct"), (11, "Nov"), (12, "Dec"),
+    (1, "Jan"),
+    (2, "Feb"),
+    (3, "Mar"),
+    (4, "Apr"),
+    (5, "May"),
+    (6, "Jun"),
+    (7, "Jul"),
+    (8, "Aug"),
+    (9, "Sep"),
+    (10, "Oct"),
+    (11, "Nov"),
+    (12, "Dec"),
 ]
-
-
-# --- Recency palette (tweak to taste) ---
-OLD_GREY = (235, 238, 242)   # light grey
-NEW_GREEN = (45, 190, 105)   # bold green
 
 
 def _clamp01(t: float) -> float:
@@ -33,20 +38,24 @@ def _lerp(a: int, b: int, t: float) -> int:
     return int(round(a + (b - a) * t))
 
 
-def _rgb_lerp(c0: tuple[int, int, int], c1: tuple[int, int, int], t: float) -> tuple[int, int, int]:
+def _rgb_lerp(
+    c0: tuple[int, int, int], c1: tuple[int, int, int], t: float
+) -> tuple[int, int, int]:
     t = _clamp01(t)
     return (_lerp(c0[0], c1[0], t), _lerp(c0[1], c1[1], t), _lerp(c0[2], c1[2], t))
 
 
-def _year_to_recency_rgb(year: int, min_year: int, max_year: int) -> tuple[int, int, int]:
+def _year_to_recency_rgb(
+    year: int, min_year: int, max_year: int
+) -> tuple[int, int, int]:
     if max_year == min_year:
-        return NEW_GREEN
+        return RECENCY.new_green
     t = (year - min_year) / (max_year - min_year)
     # Optional: bias towards highlighting recent years more aggressively
     # e.g. gamma < 1 boosts recent contrast
     gamma = 0.75
-    t = t ** gamma
-    return _rgb_lerp(OLD_GREY, NEW_GREEN, t)
+    t = t**gamma
+    return _rgb_lerp(RECENCY.old_grey, RECENCY.new_green, t)
 
 
 def _fmt(x: float | None, decimals: int = 1) -> str:
@@ -77,7 +86,9 @@ def _compute_exceptional_events(
     required = {"year", "month", ANOM_COL, TMEAN_COL}
     missing = required - set(df_cet.columns)
     if missing:
-        return pd.DataFrame(columns=["month", "month_name", "rank", "year", "tmean", "anom", "baseline"])
+        return pd.DataFrame(
+            columns=["month", "month_name", "rank", "year", "tmean", "anom", "baseline"]
+        )
 
     dff = df_cet.dropna(subset=[ANOM_COL, TMEAN_COL]).copy()
 
@@ -112,6 +123,7 @@ def _compute_exceptional_events(
 
     return pd.DataFrame(rows)
 
+
 def _build_rank_labels(mode: str, top_n: int) -> dmc.Stack:
     if mode == "warm":
         labels = ["Warmest", "2nd", "3rd"] + [f"{i}th" for i in range(4, top_n + 1)]
@@ -132,7 +144,9 @@ def _build_rank_labels(mode: str, top_n: int) -> dmc.Stack:
                     "alignItems": "center",
                     "justifyContent": "flex-end",
                 },
-                children=dmc.Text(labels[i], size="sm", fw=700 if i == 0 else 500, c="dimmed"),
+                children=dmc.Text(
+                    labels[i], size="sm", fw=700 if i == 0 else 500, c="dimmed"
+                ),
             )
         )
 
@@ -140,7 +154,9 @@ def _build_rank_labels(mode: str, top_n: int) -> dmc.Stack:
         gap="xs",
         children=[
             dmc.Text("Rank", fw=700, ta="right"),
-            dmc.Text(" ", size="xs"),  # tiny spacer to align with month header baseline line
+            dmc.Text(
+                " ", size="xs"
+            ),  # tiny spacer to align with month header baseline line
             *items,
         ],
     )
@@ -194,7 +210,9 @@ def _build_month_column(
                     children=[
                         dmc.Text(str(year), fw=800, ta="center", c=fg),
                         dmc.Text(f"{_fmt(tmean, 1)} °C", size="sm", ta="center", c=fg),
-                        dmc.Text(f"{_fmt(anom, 1)} °C", size="sm", fw=700, ta="center", c=fg),
+                        dmc.Text(
+                            f"{_fmt(anom, 1)} °C", size="sm", fw=700, ta="center", c=fg
+                        ),
                     ],
                 )
         else:
@@ -222,11 +240,14 @@ def _build_month_column(
         gap=0,
         children=[
             dmc.Text(month_label, fw=800, ta="center"),
-            dmc.Text(f"{_fmt(base_val, 1)}° (61–90)", size="xs", ta="center", c="dimmed"),
+            dmc.Text(
+                f"{_fmt(base_val, 1)}° (61–90)", size="xs", ta="center", c="dimmed"
+            ),
         ],
     )
 
     return dmc.Stack(gap="xs", children=[header, *cells])
+
 
 def _build_exceptional_timeline_figure(
     events: pd.DataFrame,
@@ -240,11 +261,7 @@ def _build_exceptional_timeline_figure(
     fig = go.Figure()
 
     if events.empty:
-        fig.update_layout(
-            template="plotly_white",
-            title=title,
-            margin=dict(l=10, r=10, t=40, b=10),
-        )
+        fig.update_layout(template=CLIMATE_TEMPLATE, **layout_timeline(title, height=180))
         return fig
 
     # y lanes = rank (1..N) but we invert visually so rank 1 is on top
@@ -313,26 +330,10 @@ def _build_exceptional_timeline_figure(
     # - y axis hidden
     # - x grid only (subtle)
     # - keep height modest
-    fig.update_layout(
-        template="plotly_white",
-        title=dict(text=title, x=0.0, xanchor="left", font=dict(size=16)),
-        margin=dict(l=10, r=10, t=45, b=30),
-        height=180 if top_n <= 3 else 220,
-    )
+    height = 180 if top_n <= 3 else 220
+    fig.update_layout(template=CLIMATE_TEMPLATE, **layout_timeline(title, height=height))
 
-    fig.update_xaxes(
-        title="Year",
-        showgrid=True,
-        gridcolor="rgba(0,0,0,0.08)",
-        zeroline=False,
-    )
-
-    fig.update_yaxes(
-        visible=False,
-        showgrid=False,
-        zeroline=False,
-        range=[0.5, top_n + 0.5],
-    )
+    fig.update_yaxes(range=[0.5, top_n + 0.5], visible=False, showgrid=False, zeroline=False)
 
     # Optional subtle rank labels on the left as annotations (keeps y-axis hidden)
     ann = []
@@ -349,7 +350,7 @@ def _build_exceptional_timeline_figure(
                 xanchor="right",
                 text=lab,
                 showarrow=False,
-                font=dict(size=11, color="rgba(0,0,0,0.45)"),
+                font=dict(size=11, color=PLOT.annotation_text),
                 align="right",
             )
         )
@@ -371,7 +372,10 @@ def build_exceptional_grid(
     required = {"year", "month", ANOM_COL, TMEAN_COL}
     missing = required - set(df_cet.columns)
     if missing:
-        return dmc.SimpleGrid(cols=1, children=[dmc.Alert(f"Missing columns: {sorted(missing)}", color="red")])
+        return dmc.SimpleGrid(
+            cols=1,
+            children=[dmc.Alert(f"Missing columns: {sorted(missing)}", color="red")],
+        )
 
     dff = df_cet.dropna(subset=[ANOM_COL, TMEAN_COL]).copy()
 
@@ -429,10 +433,14 @@ def register_exceptional_callbacks(app, df_cet: pd.DataFrame):
         Input("exc-color-by", "checked"),
         Input("global-view-range", "data"),
     )
-    def update_exceptional(detailed: bool, top_n: int, color_by_anom: bool, view_range_data):
+    def update_exceptional(
+        detailed: bool, top_n: int, color_by_anom: bool, view_range_data
+    ):
         top_n = int(top_n or 3)
         top_n = max(3, min(12, top_n))
-        view_range = get_view_range(view_range_data, min_year=min_year, max_year=max_year)
+        view_range = get_view_range(
+            view_range_data, min_year=min_year, max_year=max_year
+        )
         view_range_label = f"View: {view_range.start_year}:{view_range.end_year}"
 
         df_view = df_cet[

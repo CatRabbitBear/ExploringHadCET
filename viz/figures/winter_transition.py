@@ -4,8 +4,8 @@ from typing import Iterable, Sequence
 
 import plotly.graph_objs as go
 
-from app_core.plot_theme import CLIMATE_TEMPLATE, layout_cet_2d
-from app_core.palette import winter_bucket_color
+from app_core.plotly_theme import CLIMATE_TEMPLATE, layout_cet_2d
+from app_core.tokens_colors import winter_bucket_color
 
 from viz.figures.winter_layout_spec import BucketSpec
 
@@ -74,7 +74,13 @@ def build_winter_transition_figure(
         fig.add_trace(
             go.Scatter(
                 x=[x - cap_w, x + cap_w, None, x - cap_w, x + cap_w],
-                y=[float(s.max_y), float(s.max_y), None, float(s.min_y), float(s.min_y)],
+                y=[
+                    float(s.max_y),
+                    float(s.max_y),
+                    None,
+                    float(s.min_y),
+                    float(s.min_y),
+                ],
                 mode="lines",
                 line=dict(color=col, width=2),
                 hoverinfo="skip",
@@ -89,13 +95,21 @@ def build_winter_transition_figure(
             med = float(getattr(s, "median_y")) if hasattr(s, "median_y") else None
 
             box_col = winter_bucket_color(i, alpha=box_line_alpha)
-            fill_col = winter_bucket_color(i, alpha=box_fill_alpha) if show_fill else "rgba(0,0,0,0)"
+            fill_col = (
+                winter_bucket_color(i, alpha=box_fill_alpha)
+                if show_fill
+                else "rgba(0,0,0,0)"
+            )
 
             # Box outline as a closed polyline
             fig.add_trace(
                 go.Scatter(
                     x=[
-                        x - box_half_width, x + box_half_width, x + box_half_width, x - box_half_width, x - box_half_width
+                        x - box_half_width,
+                        x + box_half_width,
+                        x + box_half_width,
+                        x - box_half_width,
+                        x - box_half_width,
                     ],
                     y=[q1, q1, q3, q3, q1],
                     mode="lines",

@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 import plotly.graph_objs as go
 
-from app_core.palette import winter_bucket_color
+from app_core.tokens_colors import PLOT, winter_bucket_color
 
 
 def add_djf_brackets(
@@ -16,7 +16,7 @@ def add_djf_brackets(
     x_feb: str = "Feb",
     show_labels: bool = True,
     label_every: int = 1,
-    max_buckets: int | None = None,   # NEW
+    max_buckets: int | None = None,  # NEW
 ) -> go.Figure:
     """
     Overlay DJF min/max 'brackets' onto a Jul–Jun spaghetti figure.
@@ -48,8 +48,10 @@ def add_djf_brackets(
             type="line",
             xref="x",
             yref="y",
-            x0=x_dec, y0=max_y,
-            x1=x_feb, y1=max_y,
+            x0=x_dec,
+            y0=max_y,
+            x1=x_feb,
+            y1=max_y,
             line=dict(color=line_col, width=2.4),
             layer="above",
         )
@@ -59,8 +61,10 @@ def add_djf_brackets(
             type="line",
             xref="x",
             yref="y",
-            x0=x_dec, y0=min_y,
-            x1=x_feb, y1=min_y,
+            x0=x_dec,
+            y0=min_y,
+            x1=x_feb,
+            y1=min_y,
             line=dict(color=line_col, width=2.4),
             layer="above",
         )
@@ -70,15 +74,17 @@ def add_djf_brackets(
             type="line",
             xref="x",
             yref="y",
-            x0=x_jan, y0=min_y,
-            x1=x_jan, y1=max_y,
+            x0=x_jan,
+            y0=min_y,
+            x1=x_jan,
+            y1=max_y,
             line=dict(color=line_col, width=2.4),
             layer="above",
         )
 
         # Optional label near the top-right of the bracket
         if show_labels and (i % max(1, label_every) == 0):
-            label_on_top = (i % 2 == 0)
+            label_on_top = i % 2 == 0
 
             label_y = max_y if label_on_top else min_y
             label_y_offset = 0.18 if label_on_top else -0.18
@@ -97,6 +103,7 @@ def add_djf_brackets(
             )
 
     return fig
+
 
 def add_first_bracket_explainers(
     fig: go.Figure,
@@ -149,13 +156,13 @@ def add_first_bracket_explainers(
         arrowcolor=col,
         arrowwidth=2,
         arrowsize=1.0,
-        ax=x_shift_px,               # text to the right of the point
-        ay=-24 + y_shift_top_px,     # slightly above
+        ax=x_shift_px,  # text to the right of the point
+        ay=-24 + y_shift_top_px,  # slightly above
         xanchor="left",
         yanchor="bottom",
         font=dict(size=12, color=col),
-        bgcolor="rgba(255,255,255,0.80)",
-        bordercolor="rgba(0,0,0,0.08)",
+        bgcolor=PLOT.annotation_bg,
+        bordercolor=PLOT.annotation_border,
         borderwidth=1,
         opacity=0.98,
     )
@@ -171,13 +178,13 @@ def add_first_bracket_explainers(
         arrowcolor=col,
         arrowwidth=2,
         arrowsize=1.0,
-        ax=x_shift_px,               # text to the right of the point
-        ay=24 + y_shift_bottom_px,   # slightly below
+        ax=x_shift_px,  # text to the right of the point
+        ay=24 + y_shift_bottom_px,  # slightly below
         xanchor="left",
         yanchor="top",
         font=dict(size=12, color=col),
-        bgcolor="rgba(255,255,255,0.80)",
-        bordercolor="rgba(0,0,0,0.08)",
+        bgcolor=PLOT.annotation_bg,
+        bordercolor=PLOT.annotation_border,
         borderwidth=1,
         opacity=0.98,
     )
