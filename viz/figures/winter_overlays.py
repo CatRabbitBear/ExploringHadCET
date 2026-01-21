@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 import plotly.graph_objs as go
 
-from app_core.tokens_colors import winter_bucket_color
+from app_core.tokens_colors import PLOT, winter_bucket_color
 
 
 def add_djf_brackets(
@@ -161,8 +161,8 @@ def add_first_bracket_explainers(
         xanchor="left",
         yanchor="bottom",
         font=dict(size=12, color=col),
-        bgcolor="rgba(255,255,255,0.80)",
-        bordercolor="rgba(0,0,0,0.08)",
+        bgcolor=PLOT.annotation_bg,
+        bordercolor=PLOT.annotation_border,
         borderwidth=1,
         opacity=0.98,
     )
@@ -183,8 +183,8 @@ def add_first_bracket_explainers(
         xanchor="left",
         yanchor="top",
         font=dict(size=12, color=col),
-        bgcolor="rgba(255,255,255,0.80)",
-        bordercolor="rgba(0,0,0,0.08)",
+        bgcolor=PLOT.annotation_bg,
+        bordercolor=PLOT.annotation_border,
         borderwidth=1,
         opacity=0.98,
     )

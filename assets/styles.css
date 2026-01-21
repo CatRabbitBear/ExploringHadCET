@@ -16,3 +16,26 @@
   /* helps Plotly respect the surrounding look */
   border-radius: var(--mantine-radius-md);
 }
+
+:root {
+  --graph-height-2d: 45vh;
+  --graph-height-3d: 60vh;
+  --graph-height-story: 58vh;
+  --graph-height-timeline: 240px;
+}
+
+.graph-2d {
+  height: var(--graph-height-2d);
+}
+
+.graph-3d {
+  height: var(--graph-height-3d);
+}
+
+.graph-story {
+  height: var(--graph-height-story);
+}
+
+.graph-timeline {
+  height: var(--graph-height-timeline);
+}

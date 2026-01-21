@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 
-from app_core.plotly_theme import CLIMATE_TEMPLATE
+from app_core.plotly_theme import CLIMATE_TEMPLATE, colorbar_standard
 
 
 MONTH_LABELS = [
@@ -103,11 +103,7 @@ def build_rainfall_heatmap_figure(
             zmin=zmin,
             zmax=zmax,
             colorscale=colorscale,
-            colorbar=dict(
-                title=cbar_title,
-                len=0.75,
-                thickness=14,
-            ),
+            colorbar=colorbar_standard(cbar_title),
             # hovertemplate=(
             #     "Month: %{x}<br>"
             #     "Year: %{y}<br>"

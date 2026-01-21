@@ -75,7 +75,7 @@ def get_overview_layout(df_cet: pd.DataFrame):
                 radius="md",
                 children=[
                     dmc.Group(justify="space-between", children=[dmc.Title("2D view", order=4)]),
-                    dcc.Graph(id="cet-jan-dec-lines", style={"height": "45vh"}),
+                    dcc.Graph(id="cet-jan-dec-lines", className="graph-2d"),
                 ],
             ),
 
@@ -93,7 +93,7 @@ def get_overview_layout(df_cet: pd.DataFrame):
                                 size="sm",
                                 c="dimmed",
                             ),
-                            dcc.Graph(id="cet-3d-lines", style={"height": "60vh"}),
+                            dcc.Graph(id="cet-3d-lines", className="graph-3d"),
                         ],
                     )
                 ],

@@ -124,6 +124,46 @@ def layout_cet_3d(
 
 
 # ----------------------------
+# Timeline layout helpers
+# ----------------------------
+
+
+def layout_timeline(title: str, *, height: int) -> Dict[str, Any]:
+    """
+    Standard layout for compact timeline plots.
+    """
+    return {
+        "title": {"text": title, "x": 0.0, "xanchor": "left", "font": {"size": 16}},
+        "margin": {"l": 10, "r": 10, "t": 45, "b": 30},
+        "height": height,
+        "xaxis": {
+            "title": "Year",
+            "showgrid": True,
+            "gridcolor": PLOT.grid_2d,
+            "zeroline": False,
+        },
+        "yaxis": {
+            "visible": False,
+            "showgrid": False,
+            "zeroline": False,
+        },
+    }
+
+
+def colorbar_standard(
+    title: str,
+    *,
+    length: float = 0.75,
+    thickness: int = 14,
+) -> Dict[str, Any]:
+    return {"title": title, "len": length, "thickness": thickness}
+
+
+def contour_line_color(alpha: float = 0.25) -> str:
+    return rgba(PLOT.contour_rgb, alpha)
+
+
+# ----------------------------
 # Small trace-style helpers (optional)
 # ----------------------------
 

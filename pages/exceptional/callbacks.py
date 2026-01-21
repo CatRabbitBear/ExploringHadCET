@@ -6,7 +6,8 @@ import dash_mantine_components as dmc
 import plotly.graph_objs as go
 from dash import Input, Output
 
-from app_core.tokens_colors import CLIMATE, UI
+from app_core.tokens_colors import CLIMATE, UI, RECENCY, PLOT
+from app_core.plotly_theme import CLIMATE_TEMPLATE, layout_timeline
 from app_core.view_range import get_view_range
 
 ANOM_COL = "tmean_anom_1961_1990_c"
@@ -29,11 +30,6 @@ MONTHS = [
 ]
 
 
-# --- Recency palette (tweak to taste) ---
-OLD_GREY = (235, 238, 242)  # light grey
-NEW_GREEN = (45, 190, 105)  # bold green
-
-
 def _clamp01(t: float) -> float:
     return max(0.0, min(1.0, t))
 
@@ -53,13 +49,13 @@ def _year_to_recency_rgb(
     year: int, min_year: int, max_year: int
 ) -> tuple[int, int, int]:
     if max_year == min_year:
-        return NEW_GREEN
+        return RECENCY.new_green
     t = (year - min_year) / (max_year - min_year)
     # Optional: bias towards highlighting recent years more aggressively
     # e.g. gamma < 1 boosts recent contrast
     gamma = 0.75
     t = t**gamma
-    return _rgb_lerp(OLD_GREY, NEW_GREEN, t)
+    return _rgb_lerp(RECENCY.old_grey, RECENCY.new_green, t)
 
 
 def _fmt(x: float | None, decimals: int = 1) -> str:
@@ -265,11 +261,7 @@ def _build_exceptional_timeline_figure(
     fig = go.Figure()
 
     if events.empty:
-        fig.update_layout(
-            template="plotly_white",
-            title=title,
-            margin=dict(l=10, r=10, t=40, b=10),
-        )
+        fig.update_layout(template=CLIMATE_TEMPLATE, **layout_timeline(title, height=180))
         return fig
 
     # y lanes = rank (1..N) but we invert visually so rank 1 is on top
@@ -338,26 +330,10 @@ def _build_exceptional_timeline_figure(
     # - y axis hidden
     # - x grid only (subtle)
     # - keep height modest
-    fig.update_layout(
-        template="plotly_white",
-        title=dict(text=title, x=0.0, xanchor="left", font=dict(size=16)),
-        margin=dict(l=10, r=10, t=45, b=30),
-        height=180 if top_n <= 3 else 220,
-    )
+    height = 180 if top_n <= 3 else 220
+    fig.update_layout(template=CLIMATE_TEMPLATE, **layout_timeline(title, height=height))
 
-    fig.update_xaxes(
-        title="Year",
-        showgrid=True,
-        gridcolor="rgba(0,0,0,0.08)",
-        zeroline=False,
-    )
-
-    fig.update_yaxes(
-        visible=False,
-        showgrid=False,
-        zeroline=False,
-        range=[0.5, top_n + 0.5],
-    )
+    fig.update_yaxes(range=[0.5, top_n + 0.5], visible=False, showgrid=False, zeroline=False)
 
     # Optional subtle rank labels on the left as annotations (keeps y-axis hidden)
     ann = []
@@ -374,7 +350,7 @@ def _build_exceptional_timeline_figure(
                 xanchor="right",
                 text=lab,
                 showarrow=False,
-                font=dict(size=11, color="rgba(0,0,0,0.45)"),
+                font=dict(size=11, color=PLOT.annotation_text),
                 align="right",
             )
         )

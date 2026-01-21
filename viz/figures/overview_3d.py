@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from data import get_surface_grids
-from app_core.plotly_theme import CLIMATE_TEMPLATE, layout_cet_3d
+from app_core.plotly_theme import CLIMATE_TEMPLATE, colorbar_standard, contour_line_color, layout_cet_3d
 from app_core.tokens_colors import CLIMATE
 
 
@@ -94,18 +94,13 @@ def build_cet_3d_figure(
                 cmin=CLIMATE.anomaly_cmin(),
                 cmax=CLIMATE.anomaly_cmax(),
                 colorscale=CLIMATE.anomaly_colorscale,  # diverging, warm=red, cool=blue
-                colorbar=dict(
-                    title="Anomaly (°C)",
-                    # titleside="right",
-                    len=0.65,
-                    thickness=14,
-                ),
+                colorbar=colorbar_standard("Anomaly (°C)", length=0.65),
                 contours=dict(
                     z=dict(
                         show=True,
                         usecolormap=False,
                         highlight=False,
-                        color="rgba(0,0,0,0.25)",
+                        color=contour_line_color(0.25),
                         project=dict(z=False),
                     )
                 ),

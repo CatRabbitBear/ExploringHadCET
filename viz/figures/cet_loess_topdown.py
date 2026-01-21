@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 import plotly.graph_objs as go
 
-from app_core.plotly_theme import CLIMATE_TEMPLATE
+from app_core.plotly_theme import CLIMATE_TEMPLATE, colorbar_standard, contour_line_color
 from app_core.tokens_colors import CLIMATE
 
 
@@ -88,11 +88,7 @@ def build_cet_loess_topdown_figure(
             zmin=CLIMATE.anomaly_cmin(),
             zmax=CLIMATE.anomaly_cmax(),
             colorscale=CLIMATE.anomaly_colorscale,
-            colorbar=dict(
-                title="LOESS anomaly (°C)",
-                len=0.75,
-                thickness=14,
-            ),
+            colorbar=colorbar_standard("LOESS anomaly (°C)"),
             hovertemplate=(
                 "Month: %{x}<br>"
                 "Year: %{y}<br>"
@@ -116,7 +112,7 @@ def build_cet_loess_topdown_figure(
                     showlabels=False,
                 ),
                 line=dict(
-                    color=f"rgba(0,0,0,{contour_line_alpha})",
+                    color=contour_line_color(contour_line_alpha),
                     width=1,
                 ),
                 showscale=False,

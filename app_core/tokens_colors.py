@@ -51,6 +51,18 @@ class PlotPalette:
     grid_2d: str
     grid_3d: str
     history_grey: Tuple[int, int, int]
+    annotation_text: str
+    annotation_bg: str
+    annotation_border: str
+    line_compare: str
+    line_highlight: str
+    contour_rgb: Tuple[int, int, int]
+
+
+@dataclass(frozen=True)
+class RecencyPalette:
+    old_grey: Tuple[int, int, int]
+    new_green: Tuple[int, int, int]
 
 
 
@@ -75,6 +87,17 @@ PLOT = PlotPalette(
     grid_2d="rgba(0,0,0,0.08)",
     grid_3d="rgba(0,0,0,0.12)",
     history_grey=(160, 160, 160),
+    annotation_text="rgba(0,0,0,0.45)",
+    annotation_bg="rgba(255,255,255,0.80)",
+    annotation_border="rgba(0,0,0,0.08)",
+    line_compare="rgba(60,60,60,0.85)",
+    line_highlight="rgba(20,20,20,1.0)",
+    contour_rgb=(0, 0, 0),
+)
+
+RECENCY = RecencyPalette(
+    old_grey=(235, 238, 242),
+    new_green=(45, 190, 105),
 )
 
 # Winter/era categorical colours

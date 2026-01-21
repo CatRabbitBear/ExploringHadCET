@@ -117,7 +117,7 @@ def get_exceptional_layout(df_cet: pd.DataFrame):
                                 dcc.Graph(
                                     id="exc-hot-timeline",
                                     config={"displayModeBar": False},
-                                    style={"height": "240px"},
+                                    className="graph-timeline",
                                 ),
                             ],
                         ),
@@ -156,7 +156,7 @@ def get_exceptional_layout(df_cet: pd.DataFrame):
                                 dcc.Graph(
                                     id="exc-cold-timeline",
                                     config={"displayModeBar": False},
-                                    style={"height": "240px"},
+                                    className="graph-timeline",
                                 ),
                             ],
                         ),
