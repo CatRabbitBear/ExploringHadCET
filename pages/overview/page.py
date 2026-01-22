@@ -107,7 +107,11 @@ def get_overview_layout(df_cet: pd.DataFrame):
                 children=[
                     dmc.Group(
                         justify="space-between",
-                        children=[dmc.Title("2D view", order=4)],
+                        children=[
+                            dmc.Title(
+                                "How Monthly Temperatures Compare Year by Year", order=2
+                            )
+                        ],
                     ),
                     dcc.Graph(id="cet-jan-dec-lines", className="graph-2d"),
                 ],

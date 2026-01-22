@@ -1,9 +1,7 @@
 ### Welcome
 
-This dashboard is a small, data-focused exploration of historical UK climate observations. Its purpose is to present long-running temperature records clearly and consistently, allowing patterns to be seen across decades and centuries without making predictions or claims about causes.
+This project presents a small, data-focused exploration of long-running UK temperature observations. It aims to show how measured temperatures are distributed and how they compare across long periods of time, without making predictions or attributing causes.
 
-The primary dataset used here is the Central England Temperature record, derived from observations maintained by the [Met Office](https://www.metoffice.gov.uk). This series represents one of the longest continuous instrumental temperature records in the world and is widely used in scientific research.
+The data shown here comes from the Central England Temperature (HadCET) record, derived from observations maintained by the [Met Office HadCET dataset](https://www.metoffice.gov.uk/hadobs/hadcet/data/download.html). It is one of the longest continuous instrumental temperature records available and is widely used in climate research.
 
-The focus throughout the dashboard is on **monthly mean temperatures**, shown in ways that emphasise distribution, seasonality, and historical context rather than individual events. Where smoothing or aggregation is used, it is applied to aid readability while preserving the underlying measurements.
-
-Each chart includes optional guidance to help explain what is being shown and how it can be read. More detailed discussion of data handling and visual choices is available in the Methodology section.
+Throughout the page, temperatures are summarised as **monthly means**. This approach reduces short-term variability and helps longer-term patterns and seasonal structure emerge, at the cost of masking some day-to-day detail. It is a deliberate trade-off made to support comparison across decades and centuries.
