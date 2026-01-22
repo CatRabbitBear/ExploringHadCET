@@ -29,6 +29,15 @@ def get_overview_layout(df_cet: pd.DataFrame):
                 shadow="sm",
                 radius="md",
                 children=[
+                    dmc.Group(
+                        justify="space-between",
+                        children=[
+                            dmc.Title(
+                                "How Monthly Temperatures Compare Year by Year", order=2
+                            )
+                        ],
+                    ),
+                    dcc.Graph(id="cet-jan-dec-lines", className="graph-2d"),
                     dmc.Stack(
                         gap="sm",
                         children=[
@@ -39,9 +48,9 @@ def get_overview_layout(df_cet: pd.DataFrame):
                                     dmc.Stack(
                                         gap=2,
                                         children=[
-                                            dmc.Text("2D highlight", fw=600),
+                                            dmc.Text("Highlighted year", fw=600),
                                             dmc.Text(
-                                                "One year stands out against the full context.",
+                                                "View a particular year against the full context.",
                                                 size="sm",
                                                 c="dimmed",
                                             ),
@@ -91,31 +100,11 @@ def get_overview_layout(df_cet: pd.DataFrame):
                                     ),
                                 ],
                             ),
-                            dmc.Text(
-                                f"Data range: {min_year}–{max_year}",
-                                size="xs",
-                                c="dimmed",
-                            ),
-                        ],
-                    )
-                ],
-            ),
-            dmc.Card(
-                withBorder=True,
-                shadow="sm",
-                radius="md",
-                children=[
-                    dmc.Group(
-                        justify="space-between",
-                        children=[
-                            dmc.Title(
-                                "How Monthly Temperatures Compare Year by Year", order=2
-                            )
                         ],
                     ),
-                    dcc.Graph(id="cet-jan-dec-lines", className="graph-2d"),
                 ],
             ),
+            render_md_section(__file__, "sections/02_2d_discussion.md"),
             dmc.Card(
                 withBorder=True,
                 shadow="sm",
@@ -127,7 +116,7 @@ def get_overview_layout(df_cet: pd.DataFrame):
                             dmc.Group(
                                 justify="space-between",
                                 children=[
-                                    dmc.Title("3D view (LOESS surface)", order=4)
+                                    dmc.Title("A Smoothed View Across Years", order=2)
                                 ],
                             ),
                             dmc.Text(
@@ -140,5 +129,6 @@ def get_overview_layout(df_cet: pd.DataFrame):
                     )
                 ],
             ),
+            render_md_section(__file__, "sections/03_3d_discussion.md"),
         ],
     )

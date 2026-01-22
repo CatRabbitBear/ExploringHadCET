@@ -2,7 +2,12 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from data import get_surface_grids
-from app_core.plotly_theme import CLIMATE_TEMPLATE, colorbar_standard, contour_line_color, layout_cet_3d
+from app_core.plotly_theme import (
+    CLIMATE_TEMPLATE,
+    colorbar_standard,
+    contour_line_color,
+    layout_cet_3d,
+)
 from app_core.tokens_colors import CLIMATE
 
 
@@ -131,7 +136,8 @@ def build_cet_3d_figure(
     fig3d.update_layout(
         margin=dict(l=0, r=0, t=10, b=0),
         scene=dict(
-            camera=dict(eye=dict(x=1.6, y=1.35, z=0.9)),
+            # camera=dict(eye=dict(x=1.6, y=1.35, z=0.9)),
+            camera=dict(eye=dict(x=1.3, y=-2.5, z=0.6)),
             aspectratio=dict(x=1.1, y=1.8, z=0.8),
         ),
     )
