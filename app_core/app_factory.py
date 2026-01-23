@@ -16,6 +16,7 @@ def create_dash_app() -> Dash:
     app = Dash(__name__, suppress_callback_exceptions=True)
 
     df_cet = load_monthly_features()
+    print(df_cet.columns)
 
     app.layout = get_shell_layout(df_cet)
 
