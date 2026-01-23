@@ -3,6 +3,7 @@ import dash_mantine_components as dmc
 import pandas as pd
 
 from pages.markdown_utils import render_md_section
+from ui_components.cards import page_footer
 
 
 def get_overview_layout(df_cet: pd.DataFrame):
@@ -28,6 +29,7 @@ def get_overview_layout(df_cet: pd.DataFrame):
                 withBorder=True,
                 shadow="sm",
                 radius="md",
+                my="md",
                 children=[
                     dmc.Group(
                         justify="space-between",
@@ -109,6 +111,7 @@ def get_overview_layout(df_cet: pd.DataFrame):
                 withBorder=True,
                 shadow="sm",
                 radius="md",
+                my="md",
                 children=[
                     dmc.Stack(
                         gap="xs",
@@ -130,5 +133,16 @@ def get_overview_layout(df_cet: pd.DataFrame):
                 ],
             ),
             render_md_section(__file__, "sections/03_3d_discussion.md"),
+            page_footer(
+                github_url="https://github.com/CatRabbitBear/UKClimateDashboard",
+                linkedin_url="https://www.linkedin.com/in/anthony-cokayne-34a719356/",
+                related_links=[
+                    (
+                        "Met Office HadCET data",
+                        "https://www.metoffice.gov.uk/hadobs/hadcet/data/download.html",
+                    ),
+                ],
+                next_page=("Next: Exceptional months", "/exceptional"),
+            ),
         ],
     )

@@ -11,7 +11,6 @@ SECTIONS = [
     ("overview", "Overview"),
     ("exceptional", "Exceptional Months"),
     ("winter", "Winter in Focus"),
-    ("rainfall", "Monthly Rainfall"),
     ("method", "Methodology"),
 ]
 

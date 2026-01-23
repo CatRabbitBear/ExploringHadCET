@@ -4,8 +4,9 @@ import dash_mantine_components as dmc
 from pages.overview.page import get_overview_layout
 from pages.exceptional.page import get_exceptional_layout
 from pages.winter.page import get_winter_layout
-from pages.rainfall.page import get_rainfall_layout
+from pages.methodology.page import get_methodology_layout
 from app_core.view_range import get_view_range, set_view_range
+
 # later:
 #
 # from pages.methodology.page import get_methodology_layout
@@ -63,6 +64,7 @@ def register_shell_callbacks(app, df_cet):
         section = _section_from_path(pathname)
         return section, section
 
+
 def register_page_router_callback(app, df_cet):
     @app.callback(
         Output("page-content", "children"),
@@ -80,22 +82,16 @@ def register_page_router_callback(app, df_cet):
         if section == "winter":
             return get_winter_layout(df_cet)
 
-        if section == "rainfall":
-            return get_rainfall_layout()
+        if section == "method":
+            return get_methodology_layout(df_cet)
 
-        title_map = {
-            # "exceptional": "Exceptional Months",
-            # "winter": "Winter in Focus",
-            # "rainfall": "Monthly Rainfall",
-            "method": "Methodology",
-        }
         return dmc.Card(
             withBorder=True,
             shadow="sm",
             radius="md",
             children=[
-                dmc.Title(title_map.get(section, "Coming soon"), order=2),
-                dmc.Text("Page stub - we'll build this next.", c="dimmed"),
+                dmc.Title("Page not found", order=2),
+                dmc.Text("Something went wrong, sorry!", c="dimmed"),
             ],
         )
 
@@ -133,12 +129,18 @@ def register_view_range_callbacks(app, df_cet):
 
         if trigger == "global-range-preset":
             start, end = _range_from_preset(range_preset)
-            view_range = set_view_range(start, end, min_year=min_year, max_year=max_year)
-            preset = _preset_from_range(view_range["start_year"], view_range["end_year"])
+            view_range = set_view_range(
+                start, end, min_year=min_year, max_year=max_year
+            )
+            preset = _preset_from_range(
+                view_range["start_year"], view_range["end_year"]
+            )
             return view_range, preset
 
         if trigger == "global-view-range":
-            view_range = get_view_range(view_range_data, min_year=min_year, max_year=max_year)
+            view_range = get_view_range(
+                view_range_data, min_year=min_year, max_year=max_year
+            )
             preset = _preset_from_range(view_range.start_year, view_range.end_year)
             return no_update, preset
 

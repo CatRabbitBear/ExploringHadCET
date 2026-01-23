@@ -2,18 +2,24 @@ from dash import html, dcc
 import dash_mantine_components as dmc
 import pandas as pd
 
+from pages.markdown_utils import render_md_section
+from ui_components.cards import page_footer
+
 
 def get_exceptional_layout(df_cet: pd.DataFrame):
     return dmc.Stack(
         gap="md",
         children=[
-            dmc.Title("Exceptional Months", order=2),
-            dmc.Text(
-                "Top-ranked anomalous months for each calendar month. "
-                "Default colouring shows recency (green = recent).",
-                c="dimmed",
+            dmc.Title(
+                "Exceptional Months in the Temperature Record", order=2, ta="center"
             ),
-
+            dmc.Title(
+                "Identifying the most unusual warm and cold months using a fixed historical baseline.",
+                order=3,
+                ta="center",
+                fs="italic",
+            ),
+            render_md_section(__file__, "sections/01_intro.md"),
             # --- Controls ---
             dmc.Card(
                 withBorder=True,
@@ -35,7 +41,6 @@ def get_exceptional_layout(df_cet: pd.DataFrame):
                                 dmc.Badge(id="exc-view-range", variant="light"),
                             ],
                         ),
-
                         dmc.Accordion(
                             variant="separated",
                             radius="md",
@@ -57,7 +62,10 @@ def get_exceptional_layout(df_cet: pd.DataFrame):
                                                                 label="Colour by anomaly (RdBu)",
                                                                 description="Overrides recency colouring.",
                                                             ),
-                                                            dmc.Text("Top N per month", fw=600),
+                                                            dmc.Text(
+                                                                "Top N per month",
+                                                                fw=600,
+                                                            ),
                                                         ],
                                                     ),
                                                     dmc.Slider(
@@ -69,8 +77,14 @@ def get_exceptional_layout(df_cet: pd.DataFrame):
                                                         marks=[
                                                             {"value": 3, "label": "3"},
                                                             {"value": 5, "label": "5"},
-                                                            {"value": 10, "label": "10"},
-                                                            {"value": 12, "label": "12"},
+                                                            {
+                                                                "value": 10,
+                                                                "label": "10",
+                                                            },
+                                                            {
+                                                                "value": 12,
+                                                                "label": "12",
+                                                            },
                                                         ],
                                                     ),
                                                 ],
@@ -84,7 +98,6 @@ def get_exceptional_layout(df_cet: pd.DataFrame):
                     ],
                 ),
             ),
-
             # --- Warm section: table then timeline ---
             dmc.Card(
                 withBorder=True,
@@ -101,9 +114,7 @@ def get_exceptional_layout(df_cet: pd.DataFrame):
                             ],
                         ),
                         html.Div(id="exc-hot-grid"),
-
                         dmc.Divider(my="xs"),
-
                         dmc.Stack(
                             gap=4,
                             children=[
@@ -124,7 +135,6 @@ def get_exceptional_layout(df_cet: pd.DataFrame):
                     ],
                 ),
             ),
-
             # --- Cold section: table then timeline ---
             dmc.Card(
                 withBorder=True,
@@ -141,9 +151,7 @@ def get_exceptional_layout(df_cet: pd.DataFrame):
                             ],
                         ),
                         html.Div(id="exc-cold-grid"),
-
                         dmc.Divider(my="xs"),
-
                         dmc.Stack(
                             gap=4,
                             children=[
@@ -162,6 +170,18 @@ def get_exceptional_layout(df_cet: pd.DataFrame):
                         ),
                     ],
                 ),
+            ),
+            render_md_section(__file__, "sections/02_discussion.md"),
+            page_footer(
+                github_url="https://github.com/CatRabbitBear/UKClimateDashboard",
+                linkedin_url="https://www.linkedin.com/in/anthony-cokayne-34a719356/",
+                related_links=[
+                    (
+                        "Met Office HadCET data",
+                        "https://www.metoffice.gov.uk/hadobs/hadcet/data/download.html",
+                    ),
+                ],
+                next_page=("Next: Winter In Focus", "/winter"),
             ),
         ],
     )

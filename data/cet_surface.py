@@ -51,7 +51,7 @@ def build_cet_loess_surface(
         smoothed = lowess(
             endog=temps,
             exog=x_norm,
-            frac=frac,          # smoothness; tweak 0.2–0.4
+            frac=frac,  # smoothness; tweak 0.2–0.4
             it=3,
             return_sorted=False,
         )
@@ -71,7 +71,9 @@ def build_cet_loess_surface(
                 }
             )
 
-    surface_df = pd.DataFrame(rows).sort_values(["year", "month"]).reset_index(drop=True)
+    surface_df = (
+        pd.DataFrame(rows).sort_values(["year", "month"]).reset_index(drop=True)
+    )
 
     surface_path.parent.mkdir(parents=True, exist_ok=True)
     surface_df.to_parquet(surface_path, index=False)

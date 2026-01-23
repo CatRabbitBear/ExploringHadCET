@@ -2,6 +2,9 @@ from dash import dcc
 import dash_mantine_components as dmc
 import pandas as pd
 
+from pages.markdown_utils import render_md_section
+from ui_components.cards import page_footer
+
 
 def get_winter_layout(df_cet: pd.DataFrame):
     years = sorted(df_cet["year"].unique().astype(int).tolist())
@@ -10,18 +13,25 @@ def get_winter_layout(df_cet: pd.DataFrame):
     return dmc.Stack(
         gap="md",
         children=[
-            dmc.Title("Winter in Focus", order=2),
-
+            dmc.Title("Winter in Focus", order=2, ta="center"),
+            dmc.Title(
+                "Comparing December, January, and February across the historical record.",
+                order=3,
+                ta="center",
+            ),
             # --- Stores ---
-            dcc.Store(id="winter-view-mode", storage_type="local"),   # "guided" | "final"
+            dcc.Store(
+                id="winter-view-mode", storage_type="local"
+            ),  # "guided" | "final"
             dcc.Store(id="winter-step", storage_type="memory"),
             dcc.Store(id="winter-autoplay", storage_type="memory"),
             dcc.Store(id="winter-is-mobile", storage_type="memory"),
-
             # --- Intervals ---
-            dcc.Interval(id="winter-init-tick", interval=50, n_intervals=0, max_intervals=1),
+            dcc.Interval(
+                id="winter-init-tick", interval=50, n_intervals=0, max_intervals=1
+            ),
             dcc.Interval(id="winter-tick", interval=900, n_intervals=0, disabled=True),
-
+            render_md_section(__file__, "sections/01_intro.md"),
             dmc.Card(
                 withBorder=True,
                 shadow="sm",
@@ -30,7 +40,6 @@ def get_winter_layout(df_cet: pd.DataFrame):
                     dmc.Stack(
                         gap="sm",
                         children=[
-
                             dmc.Group(
                                 justify="space-between",
                                 align="end",
@@ -58,15 +67,10 @@ def get_winter_layout(df_cet: pd.DataFrame):
                                     ),
                                 ],
                             ),
-
-                            dmc.Divider(),
-
-                            dmc.Text(f"Data range: {min_year}–{max_year}", size="xs", c="dimmed"),
                         ],
                     )
                 ],
             ),
-
             dmc.Card(
                 withBorder=True,
                 shadow="sm",
@@ -76,27 +80,49 @@ def get_winter_layout(df_cet: pd.DataFrame):
                         gap="xs",
                         children=[
                             dmc.Text(id="winter-caption", size="sm", c="dimmed"),
-
                             dcc.Graph(id="winter-main-graph", className="graph-story"),
-
                             # --- Story controls (footer bar) ---
                             dmc.Group(
                                 justify="space-between",
                                 align="center",
                                 mt="xs",
                                 children=[
-                                    dmc.Button("◀ Back", id="winter-btn-back", variant="subtle"),
-
-                                    dmc.Text(id="winter-step-indicator", size="sm", c="dimmed"),
-
+                                    dmc.Button(
+                                        "◀ Back", id="winter-btn-back", variant="subtle"
+                                    ),
+                                    dmc.Text(
+                                        id="winter-step-indicator",
+                                        size="sm",
+                                        c="dimmed",
+                                    ),
                                     dmc.Group(
                                         gap="xs",
                                         children=[
-                                            dmc.Button("Next ▶", id="winter-btn-next", variant="filled"),
-                                            dmc.Button("▶ Play", id="winter-btn-play", variant="light"),
-                                            dmc.Button("Show final", id="winter-btn-final", variant="light"),
-                                            dmc.Button("Resize y-axis", id="winter-btn-resize", variant="light"),
-                                            dmc.Button("Reset ↺", id="winter-btn-reset", variant="subtle"),
+                                            dmc.Button(
+                                                "Next ▶",
+                                                id="winter-btn-next",
+                                                variant="filled",
+                                            ),
+                                            dmc.Button(
+                                                "▶ Play",
+                                                id="winter-btn-play",
+                                                variant="light",
+                                            ),
+                                            dmc.Button(
+                                                "Show final",
+                                                id="winter-btn-final",
+                                                variant="light",
+                                            ),
+                                            dmc.Button(
+                                                "Resize y-axis",
+                                                id="winter-btn-resize",
+                                                variant="light",
+                                            ),
+                                            dmc.Button(
+                                                "Reset ↺",
+                                                id="winter-btn-reset",
+                                                variant="subtle",
+                                            ),
                                         ],
                                     ),
                                 ],
@@ -104,6 +130,18 @@ def get_winter_layout(df_cet: pd.DataFrame):
                         ],
                     )
                 ],
+            ),
+            render_md_section(__file__, "sections/02_discussion.md"),
+            page_footer(
+                github_url="https://github.com/CatRabbitBear/UKClimateDashboard",
+                linkedin_url="https://www.linkedin.com/in/anthony-cokayne-34a719356/",
+                related_links=[
+                    (
+                        "Met Office HadCET data",
+                        "https://www.metoffice.gov.uk/hadobs/hadcet/data/download.html",
+                    ),
+                ],
+                next_page=("Next: Winter In Focus", "/methodology"),
             ),
         ],
     )
