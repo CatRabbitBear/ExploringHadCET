@@ -2,6 +2,9 @@ from dash import dcc
 import dash_mantine_components as dmc
 import pandas as pd
 
+from pages.markdown_utils import render_md_section
+from ui_components.cards import page_footer
+
 
 def get_overview_layout(df_cet: pd.DataFrame):
     years = sorted(df_cet["year"].unique().astype(int).tolist())
@@ -10,13 +13,33 @@ def get_overview_layout(df_cet: pd.DataFrame):
     return dmc.Stack(
         gap="md",
         children=[
-            dmc.Title("Central England Temperature – Jan–Dec by Year", order=2),
-
+            dmc.Title(
+                "What the Central England Temperature Record Shows",
+                order=2,
+                ta="center",
+            ),
+            dmc.Title(
+                "Monthly mean temperatures presented in historical context",
+                order=3,
+                ta="center",
+                fs="italic",
+            ),
+            render_md_section(__file__, "sections/01_intro.md"),
             dmc.Card(
                 withBorder=True,
                 shadow="sm",
                 radius="md",
+                my="md",
                 children=[
+                    dmc.Group(
+                        justify="space-between",
+                        children=[
+                            dmc.Title(
+                                "How Monthly Temperatures Compare Year by Year", order=2
+                            )
+                        ],
+                    ),
+                    dcc.Graph(id="cet-jan-dec-lines", className="graph-2d"),
                     dmc.Stack(
                         gap="sm",
                         children=[
@@ -27,9 +50,9 @@ def get_overview_layout(df_cet: pd.DataFrame):
                                     dmc.Stack(
                                         gap=2,
                                         children=[
-                                            dmc.Text("2D highlight", fw=600),
+                                            dmc.Text("Highlighted year", fw=600),
                                             dmc.Text(
-                                                "One year stands out against the full context.",
+                                                "View a particular year against the full context.",
                                                 size="sm",
                                                 c="dimmed",
                                             ),
@@ -43,51 +66,62 @@ def get_overview_layout(df_cet: pd.DataFrame):
                                                 id="cet-highlight-mode",
                                                 value="latest",
                                                 data=[
-                                                    {"label": "Latest", "value": "latest"},
-                                                    {"label": "Previous", "value": "previous"},
-                                                    {"label": "Reference", "value": "reference"},
-                                                    {"label": "Custom", "value": "custom"},
+                                                    {
+                                                        "label": "Latest",
+                                                        "value": "latest",
+                                                    },
+                                                    {
+                                                        "label": "Previous",
+                                                        "value": "previous",
+                                                    },
+                                                    {
+                                                        "label": "Reference",
+                                                        "value": "reference",
+                                                    },
+                                                    {
+                                                        "label": "Custom",
+                                                        "value": "custom",
+                                                    },
                                                 ],
                                             ),
                                             dmc.Select(
                                                 id="cet-highlight-year",
                                                 value=str(max_year),
-                                                data=[{"value": str(y), "label": str(y)} for y in years],
+                                                data=[
+                                                    {"value": str(y), "label": str(y)}
+                                                    for y in years
+                                                ],
                                                 searchable=True,
                                                 clearable=False,
                                                 w=140,
-                                                style={"display": "none"},  # shown only when mode == "custom"
+                                                style={
+                                                    "display": "none"
+                                                },  # shown only when mode == "custom"
                                             ),
                                         ],
                                     ),
                                 ],
                             ),
-
-                            dmc.Text(f"Data range: {min_year}–{max_year}", size="xs", c="dimmed"),
                         ],
-                    )
+                    ),
                 ],
             ),
-
+            render_md_section(__file__, "sections/02_2d_discussion.md"),
             dmc.Card(
                 withBorder=True,
                 shadow="sm",
                 radius="md",
-                children=[
-                    dmc.Group(justify="space-between", children=[dmc.Title("2D view", order=4)]),
-                    dcc.Graph(id="cet-jan-dec-lines", className="graph-2d"),
-                ],
-            ),
-
-            dmc.Card(
-                withBorder=True,
-                shadow="sm",
-                radius="md",
+                my="md",
                 children=[
                     dmc.Stack(
                         gap="xs",
                         children=[
-                            dmc.Group(justify="space-between", children=[dmc.Title("3D view (LOESS surface)", order=4)]),
+                            dmc.Group(
+                                justify="space-between",
+                                children=[
+                                    dmc.Title("A Smoothed View Across Years", order=2)
+                                ],
+                            ),
                             dmc.Text(
                                 "A smoothed surface of the same monthly data, coloured by anomaly relative to the baseline.",
                                 size="sm",
@@ -97,6 +131,18 @@ def get_overview_layout(df_cet: pd.DataFrame):
                         ],
                     )
                 ],
+            ),
+            render_md_section(__file__, "sections/03_3d_discussion.md"),
+            page_footer(
+                github_url="https://github.com/CatRabbitBear/UKClimateDashboard",
+                linkedin_url="https://www.linkedin.com/in/anthony-cokayne-34a719356/",
+                related_links=[
+                    (
+                        "Met Office HadCET data",
+                        "https://www.metoffice.gov.uk/hadobs/hadcet/data/download.html",
+                    ),
+                ],
+                next_page=("Next: Exceptional months", "/exceptional"),
             ),
         ],
     )

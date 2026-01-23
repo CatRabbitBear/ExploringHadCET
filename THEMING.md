@@ -124,4 +124,10 @@ app_core/tokens_color.py
 * Avoid inline CSS unless it solves a specific DOM problem
 * New styling should follow these layers; existing code is migrated gradually
 
+---
 
+## Heading rules
+
+* H1: page title (page.py only)
+* H2: section titles (page.py)
+* Markdown: start at H3, never use H1/H2

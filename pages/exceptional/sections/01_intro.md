@@ -1,0 +1,3 @@
+This page highlights months that stand out most strongly from the long-term temperature record. Using a fixed baseline, months are ranked by the size of their warm or cold anomaly, which can also be read as the warmest and coldest individual months on record.
+
+Results are shown separately for warm and cold anomalies. Beneath each table, a timeline places these exceptional months in their historical context, showing how they are distributed across time. Visual settings and ranking behaviour can be explored further in the Advanced tab.

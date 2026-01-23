@@ -11,7 +11,6 @@ SECTIONS = [
     ("overview", "Overview"),
     ("exceptional", "Exceptional Months"),
     ("winter", "Winter in Focus"),
-    ("rainfall", "Monthly Rainfall"),
     ("method", "Methodology"),
 ]
 
@@ -96,7 +95,10 @@ def get_shell_layout(df_cet: pd.DataFrame):
                                     dmc.Group(
                                         gap="xs",
                                         children=[
-                                            dmc.Title("UK Climate Dashboard", order=3),
+                                            dmc.Title(
+                                                "Exploring UK Temperature Records",
+                                                order=1,
+                                            ),
                                             dmc.Badge("v1", variant="light"),
                                         ],
                                     ),
