@@ -44,11 +44,10 @@ Interpretation is intentionally conservative; links are provided to authoritativ
 
 Datasets:
 - HadCET monthly mean temperature (Central England Temperature), maintained by the Met Office Hadley Centre
-- HadUKP monthly precipitation for the CET region (Met Office Hadley Centre), included for future extensions
 
 Derived data:
 - `data/processed/monthly_features.parquet` is the single artifact read by the app
-- It is built from the SQLite store in `data/db/uk_climate.sqlite`, which is seeded from raw text files in `data/raw/`
+- It is built from the HadCET monthly text file at `data/raw/hadcet_mean_monthly.txt` (path set in `data/config.py`)
 
 Attribution:
 - Source terms and updates: https://www.metoffice.gov.uk/hadobs/hadcet/data/download.html
@@ -111,7 +110,7 @@ Environment variables:
 - None required for v1.
 
 Troubleshooting:
-- `FileNotFoundError` for `monthly_features.parquet`: run the data pipeline steps below.
+- `FileNotFoundError` for `monthly_features.parquet`: run `python -m scripts.build_monthly_features` and ensure `data/raw/hadcet_mean_monthly.txt` exists.
 - Parquet read errors: install `pyarrow` and retry.
 - Port in use: set `app.run(debug=True, port=8051)` in `main.py`.
 
@@ -120,13 +119,11 @@ Troubleshooting:
 The app reads only the processed parquet artifact. To rebuild it from raw files:
 
 ```powershell
-python data/scripts/seed_db.py
-python data/scripts/build_monthly_features.py
+python -m scripts.build_monthly_features
 ```
 
 Inputs:
-- Raw files live in `data/raw/`
-- SQLite database is created at `data/db/uk_climate.sqlite`
+- Raw HadCET text file path is configured in `data/config.py` (default: `data/raw/hadcet_mean_monthly.txt`)
 
 If `monthly_features.parquet` is missing, the app will fail fast with a clear error.
 
@@ -137,6 +134,7 @@ app_core/        theme, palette, layout helpers, app state
 assets/          CSS and static assets
 data/            loaders, transforms, raw and processed data
 pages/           Dash pages and callbacks
+scripts/         data build entrypoints
 ui_components/   shared UI components
 viz/             figure builders (pure-ish functions)
 main.py          app entrypoint
@@ -164,11 +162,11 @@ Not deployed yet. Planned target: a simple Dash deployment on Render or Fly usin
 Code is licensed under Apache 2.0. See `LICENSE` for details.
 
 Data licensing:
-- HadCET and HadUKP terms are governed by the Met Office. Please consult the source page for usage notes.
+- HadCET terms are governed by the Met Office. Please consult the source page for usage notes.
 
 ## Credits / Contact
 
 - Anthony Cokayne: https://github.com/CatRabbitBear
 - LinkedIn: https://www.linkedin.com/in/anthony-cokayne-34a719356/
-- Data acknowledgements: Met Office Hadley Centre (HadCET and HadUKP)
+- Data acknowledgements: Met Office Hadley Centre (HadCET)
 - Issues and PRs welcome
