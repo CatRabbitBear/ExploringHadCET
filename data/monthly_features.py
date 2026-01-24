@@ -25,7 +25,7 @@ def load_monthly_features(path: Path | None = None) -> pd.DataFrame:
 
 
 def get_loess_surface_grid(
-    value_col: str = "tmean_loess_0p25_c",
+    value_col: str = "tmean_loess_0p07_c",
     years: list[int] | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -44,10 +44,11 @@ def get_loess_surface_grid(
     )
     return months, years_arr, Z
 
+
 def get_surface_grids(
     *,
     years: list[int] | None = None,
-    z_col: str = "tmean_loess_0p25_c",
+    z_col: str = "tmean_loess_0p07_c",
     surfacecolor_col: str | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray | None]:
     """
