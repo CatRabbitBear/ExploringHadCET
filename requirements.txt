@@ -1,5 +1,7 @@
+gunicorn
 dash
 dash-mantine-components
+dash-iconify
 numpy
 pandas
 plotly

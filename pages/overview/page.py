@@ -4,6 +4,7 @@ import pandas as pd
 
 from pages.markdown_utils import render_md_section
 from ui_components.cards import page_footer
+from ui_components.tooltips import help_tooltip
 
 
 def get_overview_layout(df_cet: pd.DataFrame):
@@ -32,11 +33,13 @@ def get_overview_layout(df_cet: pd.DataFrame):
                 my="md",
                 children=[
                     dmc.Group(
-                        justify="space-between",
+                        gap="xs",
+                        align="center",
                         children=[
                             dmc.Title(
                                 "How Monthly Temperatures Compare Year by Year", order=2
-                            )
+                            ),
+                            help_tooltip(key="overview.monthly_compare"),
                         ],
                     ),
                     dcc.Graph(id="cet-jan-dec-lines", className="graph-2d"),
@@ -117,13 +120,21 @@ def get_overview_layout(df_cet: pd.DataFrame):
                         gap="xs",
                         children=[
                             dmc.Group(
-                                justify="space-between",
+                                gap="xs",
+                                align="center",
                                 children=[
-                                    dmc.Title("A Smoothed View Across Years", order=2)
+                                    dmc.Title("A Smoothed View Across Years", order=2),
+                                    help_tooltip(key="overview.loess_surface"),
                                 ],
                             ),
                             dmc.Text(
-                                "A smoothed surface of the same monthly data, coloured by anomaly relative to the baseline.",
+                                [
+                                    "A smoothed surface of the same monthly data, coloured by anomaly ",
+                                    help_tooltip(key="overview.anomaly"),
+                                    " relative to the baseline ",
+                                    help_tooltip(key="overview.baseline_1961_1990"),
+                                    ".",
+                                ],
                                 size="sm",
                                 c="dimmed",
                             ),
