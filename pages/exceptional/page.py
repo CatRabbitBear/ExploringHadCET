@@ -4,14 +4,25 @@ import pandas as pd
 
 from pages.markdown_utils import render_md_section
 from ui_components.cards import page_footer
+from ui_components.tooltips import help_tooltip
 
 
 def get_exceptional_layout(df_cet: pd.DataFrame):
     return dmc.Stack(
         gap="md",
         children=[
-            dmc.Title(
-                "Exceptional Months in the Temperature Record", order=2, ta="center"
+            dmc.Group(
+                justify="center",
+                align="center",
+                gap="xs",
+                children=[
+                    dmc.Title(
+                        "Exceptional Months in the Temperature Record",
+                        order=2,
+                        ta="center",
+                    ),
+                    help_tooltip(key="exceptional.definition"),
+                ],
             ),
             dmc.Title(
                 "Identifying the most unusual warm and cold months using a fixed historical baseline.",

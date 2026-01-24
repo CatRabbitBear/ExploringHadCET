@@ -4,6 +4,7 @@ import pandas as pd
 
 from pages.markdown_utils import render_md_section
 from ui_components.cards import page_footer
+from ui_components.tooltips import help_tooltip
 
 
 def get_winter_layout(df_cet: pd.DataFrame):
@@ -14,10 +15,18 @@ def get_winter_layout(df_cet: pd.DataFrame):
         gap="md",
         children=[
             dmc.Title("Winter in Focus", order=2, ta="center"),
-            dmc.Title(
-                "Comparing December, January, and February across the historical record.",
-                order=3,
-                ta="center",
+            dmc.Group(
+                justify="center",
+                align="center",
+                gap="xs",
+                children=[
+                    dmc.Title(
+                        "Comparing December, January, and February across the historical record.",
+                        order=3,
+                        ta="center",
+                    ),
+                    help_tooltip(key="winter.djf_definition"),
+                ],
             ),
             # --- Stores ---
             dcc.Store(
@@ -79,7 +88,16 @@ def get_winter_layout(df_cet: pd.DataFrame):
                     dmc.Stack(
                         gap="xs",
                         children=[
-                            dmc.Text(id="winter-caption", size="sm", c="dimmed"),
+                            dmc.Group(
+                                gap="xs",
+                                align="center",
+                                children=[
+                                    dmc.Text(
+                                        id="winter-caption", size="sm", c="dimmed"
+                                    ),
+                                    help_tooltip(key="winter.winter_year"),
+                                ],
+                            ),
                             dcc.Graph(id="winter-main-graph", className="graph-story"),
                             # --- Story controls (footer bar) ---
                             dmc.Group(

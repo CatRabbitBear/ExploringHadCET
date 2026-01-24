@@ -4,6 +4,7 @@ import pandas as pd
 
 from pages.markdown_utils import render_md_section
 from ui_components.cards import page_footer
+from ui_components.tooltips import help_tooltip
 
 
 def get_methodology_layout(df_cet: pd.DataFrame):
@@ -11,7 +12,15 @@ def get_methodology_layout(df_cet: pd.DataFrame):
     return dmc.Stack(
         gap="md",
         children=[
-            dmc.Title("Methodology", order=2, ta="center"),
+            dmc.Group(
+                justify="center",
+                align="center",
+                gap="xs",
+                children=[
+                    dmc.Title("Methodology", order=2, ta="center"),
+                    help_tooltip(key="method.data_source"),
+                ],
+            ),
             # dmc.Title(
             #     "Comparing December, January, and February across the historical record.",
             #     order=3,
