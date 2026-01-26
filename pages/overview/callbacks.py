@@ -10,6 +10,18 @@ def register_overview_callbacks(app, df_cet: pd.DataFrame):
     years_all = sorted(df_cet["year"].unique().astype(int).tolist())
     min_year, max_year = years_all[0], years_all[-1]
 
+    app.clientside_callback(
+        """
+        function(n) {
+            const w = (typeof window !== "undefined") ? window.innerWidth : 1200;
+            return w <= 768;
+        }
+        """,
+        Output("overview-is-mobile", "data"),
+        Input("overview-init-tick", "n_intervals"),
+        prevent_initial_call=False,
+    )
+
     @app.callback(
         Output("cet-highlight-year", "style"),
         Input("cet-highlight-mode", "value"),
@@ -20,11 +32,18 @@ def register_overview_callbacks(app, df_cet: pd.DataFrame):
     @app.callback(
         Output("cet-jan-dec-lines", "figure"),
         Output("cet-3d-lines", "figure"),
+        Input("overview-is-mobile", "data"),
         Input("global-view-range", "data"),
         Input("cet-highlight-mode", "value"),
         Input("cet-highlight-year", "value"),
     )
-    def update_overview(view_range_data, highlight_mode: str, highlight_year_value: str | None):
+    def update_overview(
+        is_mobile: bool | None,
+        view_range_data,
+        highlight_mode: str,
+        highlight_year_value: str | None,
+    ):
+        is_mobile = bool(is_mobile)
         view_range = get_view_range(view_range_data, min_year=min_year, max_year=max_year)
         start, end = view_range.start_year, view_range.end_year
 
@@ -63,9 +82,10 @@ def register_overview_callbacks(app, df_cet: pd.DataFrame):
             years_range=years_range,
             highlight_year=highlight_year,
             compare_year=compare_year,
+            show_legend=not is_mobile,
             start_month="Jan",
             start_offset=0,
         )
-        fig_3d = build_cet_3d_figure(df_cet, years_range)
+        fig_3d = build_cet_3d_figure(df_cet, years_range, show_colorbar=not is_mobile)
 
         return fig_2d, fig_3d

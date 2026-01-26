@@ -14,6 +14,8 @@ def get_overview_layout(df_cet: pd.DataFrame):
     return dmc.Stack(
         gap="md",
         children=[
+            dcc.Store(id="overview-is-mobile"),
+            dcc.Interval(id="overview-init-tick", interval=200, n_intervals=0, max_intervals=1),
             dmc.Title(
                 "What the Central England Temperature Record Shows",
                 order=2,

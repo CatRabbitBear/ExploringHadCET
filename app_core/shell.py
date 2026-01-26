@@ -111,7 +111,7 @@ def get_shell_layout(df_cet: pd.DataFrame):
                                             ),
                                             dmc.SegmentedControl(
                                                 id="global-range-preset",
-                                                value="modern",
+                                                value="instrumental",
                                                 size="xs",
                                                 data=[
                                                     {

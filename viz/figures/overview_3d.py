@@ -17,7 +17,9 @@ SURF_COL = "tmean_loess_anom_1961_1990_c"  # computed on the fly below
 
 
 def build_cet_3d_figure(
-    df_cet: pd.DataFrame, selected_years: list[int] | None
+    df_cet: pd.DataFrame,
+    selected_years: list[int] | None,
+    show_colorbar: bool = True,
 ) -> go.Figure:
     if not selected_years:
         selected_years = [int(df_cet["year"].max())]
@@ -117,7 +119,7 @@ def build_cet_3d_figure(
                     fresnel=0.00,
                 ),
                 lightposition=dict(x=6.5, y=1850, z=5),
-                showscale=True,
+                showscale=show_colorbar,
                 name="LOESS surface",
                 hovertemplate=(
                     "Month: %{x}<br>"

@@ -17,16 +17,24 @@ logger = logging.getLogger(__name__)
 
 def create_dash_app(import_name: str) -> Dash:
     logger.info("Creating Dash app...")
-    app = Dash(import_name, 
-               suppress_callback_exceptions=True, 
-               title="Exploring HadCET – UK Climate Data",
-                meta_tags=[
-                    {"name": "description", "content": "Interactive exploration of UK climate trends using HadCET temperature data."},
-                    {"name": "viewport", "content": "width=device-width, initial-scale=1"},
-                    {"property": "og:title", "content": "Exploring HadCET"},
-                    {"property": "og:description", "content": "Visual exploration of UK climate trends from historical temperature data."},
-                    {"property": "og:type", "content": "website"},
-                ],)
+    app = Dash(
+        import_name,
+        suppress_callback_exceptions=True,
+        title="Exploring HadCET – UK Climate Data",
+        meta_tags=[
+            {
+                "name": "description",
+                "content": "Interactive exploration of UK climate trends using HadCET temperature data.",
+            },
+            {"name": "viewport", "content": "width=device-width, initial-scale=1"},
+            {"property": "og:title", "content": "Exploring HadCET"},
+            {
+                "property": "og:description",
+                "content": "Visual exploration of UK climate trends from historical temperature data.",
+            },
+            {"property": "og:type", "content": "website"},
+        ],
+    )
 
     df_cet = load_monthly_features()
     logger.info("Monthly features data loaded.")

@@ -13,6 +13,7 @@ def build_cet_2d_figure(
     years_range: list[int],
     highlight_year: int | None = None,
     compare_year: int | None = None,
+    show_legend: bool = True,
     *,
     start_month: str = "Jan",
     start_offset: int = 0,
@@ -38,4 +39,5 @@ def build_cet_2d_figure(
     if highlight_year is not None:
         fig = add_highlight_year(fig, dff, int(highlight_year))
 
+    fig.update_layout(showlegend=show_legend)
     return fig
