@@ -15,7 +15,9 @@ def get_overview_layout(df_cet: pd.DataFrame):
         gap="md",
         children=[
             dcc.Store(id="overview-is-mobile"),
-            dcc.Interval(id="overview-init-tick", interval=200, n_intervals=0, max_intervals=1),
+            dcc.Interval(
+                id="overview-init-tick", interval=200, n_intervals=0, max_intervals=1
+            ),
             dmc.Title(
                 "What the Central England Temperature Record Shows",
                 order=2,
@@ -129,16 +131,24 @@ def get_overview_layout(df_cet: pd.DataFrame):
                                     help_tooltip(key="overview.loess_surface"),
                                 ],
                             ),
-                            dmc.Text(
-                                [
-                                    "A smoothed surface of the same monthly data, coloured by anomaly ",
-                                    help_tooltip(key="overview.anomaly"),
-                                    " relative to the baseline ",
-                                    help_tooltip(key="overview.baseline_1961_1990"),
-                                    ".",
+                            dmc.Group(
+                                gap=6,
+                                align="center",
+                                wrap="wrap",
+                                children=[
+                                    dmc.Text(
+                                        "A smoothed surface of the same monthly data, coloured by anomaly relative to the baseline.",
+                                        size="sm",
+                                        c="dimmed",
+                                    ),
+                                    help_tooltip(
+                                        key="overview.anomaly", position="right"
+                                    ),
+                                    help_tooltip(
+                                        key="overview.baseline_1961_1990",
+                                        position="right",
+                                    ),
                                 ],
-                                size="sm",
-                                c="dimmed",
                             ),
                             dcc.Graph(id="cet-3d-lines", className="graph-3d"),
                         ],
