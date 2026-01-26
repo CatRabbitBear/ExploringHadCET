@@ -15,9 +15,9 @@ from pages.winter.callbacks import register_winter_callbacks
 logger = logging.getLogger(__name__)
 
 
-def create_dash_app() -> Dash:
+def create_dash_app(import_name: str) -> Dash:
     logger.info("Creating Dash app...")
-    app = Dash(__name__, 
+    app = Dash(import_name, 
                suppress_callback_exceptions=True, 
                title="Exploring HadCET – UK Climate Data",
                 meta_tags=[
