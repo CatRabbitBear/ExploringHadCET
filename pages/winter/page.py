@@ -1,6 +1,6 @@
-from dash import dcc
 import dash_mantine_components as dmc
 import pandas as pd
+from dash import dcc
 
 from pages.markdown_utils import render_md_section
 from ui_components.cards import page_footer
@@ -8,9 +8,6 @@ from ui_components.tooltips import help_tooltip
 
 
 def get_winter_layout(df_cet: pd.DataFrame):
-    years = sorted(df_cet["year"].unique().astype(int).tolist())
-    min_year, max_year = years[0], years[-1]
-
     return dmc.Stack(
         gap="md",
         children=[
@@ -159,7 +156,7 @@ def get_winter_layout(df_cet: pd.DataFrame):
                         "https://www.metoffice.gov.uk/hadobs/hadcet/data/download.html",
                     ),
                 ],
-                next_page=("Next: Winter In Focus", "/methodology"),
+                next_page=("Next: Methodology", "/method"),
             ),
         ],
     )

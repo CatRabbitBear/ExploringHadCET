@@ -9,7 +9,7 @@ from ui_components.tooltips import help_tooltip
 
 def get_overview_layout(df_cet: pd.DataFrame):
     years = sorted(df_cet["year"].unique().astype(int).tolist())
-    min_year, max_year = years[0], years[-1]
+    max_year = years[-1]
 
     return dmc.Stack(
         gap="md",
