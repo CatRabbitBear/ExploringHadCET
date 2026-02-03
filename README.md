@@ -146,10 +146,6 @@ main.py          app entrypoint
 - Hover tooltips and markdown callouts reduce jargon for non-expert readers.
 - Layout uses consistent section headers and narrative pacing to support scanning.
 
-## Deployment
-
-Not deployed yet. Planned target: a simple Dash deployment on Render or Fly using a container or a `gunicorn` entrypoint.
-
 ## Roadmap (v2 ideas)
 
 - Winter frost-day proxy from daily Tmin as a companion to the DJF narrative
