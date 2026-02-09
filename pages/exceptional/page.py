@@ -3,12 +3,13 @@ import dash_mantine_components as dmc
 import pandas as pd
 
 from pages.markdown_utils import render_md_section
+from pages.exceptional.skeletons import build_exceptional_page_skeleton_overlay
 from ui_components.cards import page_footer
 from ui_components.tooltips import help_tooltip
 
 
 def get_exceptional_layout(df_cet: pd.DataFrame):
-    return dmc.Stack(
+    content = dmc.Stack(
         gap="md",
         children=[
             dmc.Group(
@@ -195,4 +196,9 @@ def get_exceptional_layout(df_cet: pd.DataFrame):
                 next_page=("Next: Winter In Focus", "/winter"),
             ),
         ],
+    )
+
+    return dmc.Box(
+        style={"position": "relative"},
+        children=[content, build_exceptional_page_skeleton_overlay()],
     )

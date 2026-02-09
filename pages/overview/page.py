@@ -3,6 +3,11 @@ import dash_mantine_components as dmc
 import pandas as pd
 
 from pages.markdown_utils import render_md_section
+from pages.overview.skeletons import (
+    build_overview_page_skeleton_overlay,
+    wrap_overview_2d_skeleton,
+    wrap_overview_3d_skeleton,
+)
 from ui_components.cards import page_footer
 from ui_components.tooltips import help_tooltip
 
@@ -11,7 +16,7 @@ def get_overview_layout(df_cet: pd.DataFrame):
     years = sorted(df_cet["year"].unique().astype(int).tolist())
     max_year = years[-1]
 
-    return dmc.Stack(
+    content = dmc.Stack(
         gap="md",
         children=[
             dcc.Store(id="overview-is-mobile"),
@@ -46,7 +51,9 @@ def get_overview_layout(df_cet: pd.DataFrame):
                             help_tooltip(key="overview.monthly_compare"),
                         ],
                     ),
-                    dcc.Graph(id="cet-jan-dec-lines", className="graph-2d"),
+                    wrap_overview_2d_skeleton(
+                        dcc.Graph(id="cet-jan-dec-lines", className="graph-2d")
+                    ),
                     dmc.Stack(
                         gap="sm",
                         children=[
@@ -150,7 +157,9 @@ def get_overview_layout(df_cet: pd.DataFrame):
                                     ),
                                 ],
                             ),
-                            dcc.Graph(id="cet-3d-lines", className="graph-3d"),
+                            wrap_overview_3d_skeleton(
+                                dcc.Graph(id="cet-3d-lines", className="graph-3d")
+                            ),
                         ],
                     )
                 ],
@@ -168,4 +177,9 @@ def get_overview_layout(df_cet: pd.DataFrame):
                 next_page=("Next: Exceptional months", "/exceptional"),
             ),
         ],
+    )
+
+    return dmc.Box(
+        style={"position": "relative"},
+        children=[content, build_overview_page_skeleton_overlay()],
     )
