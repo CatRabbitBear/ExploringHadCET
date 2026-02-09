@@ -12,8 +12,8 @@ THEME = {
     # Base typography
     "fontFamily": FONT_BODY,
     # Primary colour & shape
-    "primaryColor": "cyan",
-    "defaultRadius": "md",
+    "primaryColor": "brand",
+    "defaultRadius": "sm",
     "black": "#2f4058",
     # Headings configuration
     "headings": {
@@ -45,7 +45,18 @@ THEME = {
     },
     # Optional: slightly calmer default text tone
     "colors": {
-        # included here to show intent
+        "brand": [
+            "#e3fafc",
+            "#c5f6fa",
+            "#99e9f2",
+            "#66d9e8",
+            "#3bc9db",
+            "#22b8cf",
+            "#15aabf",
+            "#1098ad",
+            "#0c8599",
+            "#0b7285",
+        ],
     },
     "shadows": {
         "sm": "0 1px 2px rgba(0,0,0,0.08)",

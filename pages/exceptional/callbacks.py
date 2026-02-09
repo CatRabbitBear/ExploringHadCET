@@ -9,6 +9,10 @@ from dash import Input, Output
 from app_core.tokens_colors import CLIMATE, UI, RECENCY, PLOT
 from app_core.plotly_theme import CLIMATE_TEMPLATE, layout_timeline
 from app_core.view_range import get_view_range
+from pages.exceptional.skeletons import (
+    PAGE_SKELETON_HIDDEN_STYLE,
+    PAGE_SKELETON_OVERLAY_ID,
+)
 
 ANOM_COL = "tmean_anom_1961_1990_c"
 BASE_COL = "tmean_base_1961_1990_c"
@@ -428,6 +432,7 @@ def register_exceptional_callbacks(app, df_cet: pd.DataFrame):
         Output("exc-hot-timeline", "figure"),
         Output("exc-cold-timeline", "figure"),
         Output("exc-view-range", "children"),
+        Output(PAGE_SKELETON_OVERLAY_ID, "style"),
         Input("exc-more-detail", "checked"),
         Input("exc-top-n", "value"),
         Input("exc-color-by", "checked"),
@@ -490,4 +495,11 @@ def register_exceptional_callbacks(app, df_cet: pd.DataFrame):
             max_year=view_range.end_year,
         )
 
-        return hot_grid, cold_grid, hot_fig, cold_fig, view_range_label
+        return (
+            hot_grid,
+            cold_grid,
+            hot_fig,
+            cold_fig,
+            view_range_label,
+            PAGE_SKELETON_HIDDEN_STYLE,
+        )

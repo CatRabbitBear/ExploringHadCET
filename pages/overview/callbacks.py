@@ -1,9 +1,13 @@
-from dash import Input, Output
 import pandas as pd
+from dash import Input, Output
 
+from app_core.view_range import get_view_range
+from pages.overview.skeletons import (
+    PAGE_SKELETON_HIDDEN_STYLE,
+    PAGE_SKELETON_OVERLAY_ID,
+)
 from viz.figures.overview_2d import build_cet_2d_figure
 from viz.figures.overview_3d import build_cet_3d_figure
-from app_core.view_range import get_view_range
 
 
 def register_overview_callbacks(app, df_cet: pd.DataFrame):
@@ -32,6 +36,7 @@ def register_overview_callbacks(app, df_cet: pd.DataFrame):
     @app.callback(
         Output("cet-jan-dec-lines", "figure"),
         Output("cet-3d-lines", "figure"),
+        Output(PAGE_SKELETON_OVERLAY_ID, "style"),
         Input("overview-is-mobile", "data"),
         Input("global-view-range", "data"),
         Input("cet-highlight-mode", "value"),
@@ -44,7 +49,9 @@ def register_overview_callbacks(app, df_cet: pd.DataFrame):
         highlight_year_value: str | None,
     ):
         is_mobile = bool(is_mobile)
-        view_range = get_view_range(view_range_data, min_year=min_year, max_year=max_year)
+        view_range = get_view_range(
+            view_range_data, min_year=min_year, max_year=max_year
+        )
         start, end = view_range.start_year, view_range.end_year
 
         years_range = list(range(start, end + 1))
@@ -59,15 +66,19 @@ def register_overview_callbacks(app, df_cet: pd.DataFrame):
 
         if highlight_mode == "previous":
             highlight_year = clamp_to_range(end - 1)
-            compare_year = clamp_to_range(end)   # compare against latest
+            compare_year = clamp_to_range(end)  # compare against latest
         elif highlight_mode == "reference":
             # Choose a clear reference year and clamp to available range
             ref = 1961
             highlight_year = clamp_to_range(ref)
-            compare_year = clamp_to_range(end)   # compare reference to latest
+            compare_year = clamp_to_range(end)  # compare reference to latest
         elif highlight_mode == "custom":
             try:
-                y = int(highlight_year_value) if highlight_year_value is not None else end
+                y = (
+                    int(highlight_year_value)
+                    if highlight_year_value is not None
+                    else end
+                )
             except ValueError:
                 y = end
             highlight_year = clamp_to_range(y)
@@ -88,4 +99,4 @@ def register_overview_callbacks(app, df_cet: pd.DataFrame):
         )
         fig_3d = build_cet_3d_figure(df_cet, years_range, show_colorbar=not is_mobile)
 
-        return fig_2d, fig_3d
+        return fig_2d, fig_3d, PAGE_SKELETON_HIDDEN_STYLE
