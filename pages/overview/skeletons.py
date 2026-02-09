@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import dash_mantine_components as dmc
 
-SKELETON_2D_ID = "overview-skeleton-2d"
-SKELETON_3D_ID = "overview-skeleton-3d"
 PAGE_SKELETON_OVERLAY_ID = "overview-page-skeleton-overlay"
 
 
@@ -14,29 +12,7 @@ PAGE_SKELETON_VISIBLE_STYLE = {
     "background": "var(--mantine-color-body)",
 }
 
-PAGE_SKELETON_HIDDEN_STYLE = {
-    "display": "none",
-}
-
-
-def wrap_overview_2d_skeleton(child):
-    return dmc.Skeleton(
-        id=SKELETON_2D_ID,
-        visible=True,
-        radius="md",
-        style={"height": "var(--graph-height-2d)"},
-        children=child,
-    )
-
-
-def wrap_overview_3d_skeleton(child):
-    return dmc.Skeleton(
-        id=SKELETON_3D_ID,
-        visible=True,
-        radius="md",
-        style={"height": "var(--graph-height-3d)"},
-        children=child,
-    )
+PAGE_SKELETON_HIDDEN_STYLE = {"display": "none"}
 
 
 def build_overview_page_skeleton_overlay():

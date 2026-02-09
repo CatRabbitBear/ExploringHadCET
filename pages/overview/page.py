@@ -5,8 +5,6 @@ import pandas as pd
 from pages.markdown_utils import render_md_section
 from pages.overview.skeletons import (
     build_overview_page_skeleton_overlay,
-    wrap_overview_2d_skeleton,
-    wrap_overview_3d_skeleton,
 )
 from ui_components.cards import page_footer
 from ui_components.tooltips import help_tooltip
@@ -51,9 +49,7 @@ def get_overview_layout(df_cet: pd.DataFrame):
                             help_tooltip(key="overview.monthly_compare"),
                         ],
                     ),
-                    wrap_overview_2d_skeleton(
-                        dcc.Graph(id="cet-jan-dec-lines", className="graph-2d")
-                    ),
+                    dcc.Graph(id="cet-jan-dec-lines", className="graph-2d"),
                     dmc.Stack(
                         gap="sm",
                         children=[
@@ -157,9 +153,7 @@ def get_overview_layout(df_cet: pd.DataFrame):
                                     ),
                                 ],
                             ),
-                            wrap_overview_3d_skeleton(
-                                dcc.Graph(id="cet-3d-lines", className="graph-3d")
-                            ),
+                            dcc.Graph(id="cet-3d-lines", className="graph-3d"),
                         ],
                     )
                 ],

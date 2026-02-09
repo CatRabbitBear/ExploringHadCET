@@ -13,7 +13,7 @@ THEME = {
     "fontFamily": FONT_BODY,
     # Primary colour & shape
     "primaryColor": "brand",
-    "defaultRadius": "md",
+    "defaultRadius": "sm",
     "black": "#2f4058",
     # Headings configuration
     "headings": {

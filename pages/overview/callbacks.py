@@ -5,8 +5,6 @@ from app_core.view_range import get_view_range
 from pages.overview.skeletons import (
     PAGE_SKELETON_HIDDEN_STYLE,
     PAGE_SKELETON_OVERLAY_ID,
-    SKELETON_2D_ID,
-    SKELETON_3D_ID,
 )
 from viz.figures.overview_2d import build_cet_2d_figure
 from viz.figures.overview_3d import build_cet_3d_figure
@@ -43,10 +41,6 @@ def register_overview_callbacks(app, df_cet: pd.DataFrame):
         Input("global-view-range", "data"),
         Input("cet-highlight-mode", "value"),
         Input("cet-highlight-year", "value"),
-        running=[
-            (Output(SKELETON_2D_ID, "visible"), True, False),
-            (Output(SKELETON_3D_ID, "visible"), True, False),
-        ],
     )
     def update_overview(
         is_mobile: bool | None,
